@@ -32,6 +32,7 @@ import urllib2
 import md5
 import threading
 import time
+import gobject
 
 gtk.gdk.threads_init()
 
@@ -49,7 +50,6 @@ class Installer:
         self.installer.set_title("arkOS Installer")
         self.installer.connect("cancel", self.quit_it)
         self.installer.connect("close", self.quit_it)
-        self.installer.connect("apply", self.quit_it)
 
         # Initialize basic pages
         self.create_page0()
@@ -60,74 +60,44 @@ class Installer:
         self.installer.show()
 
     def quit_it(self, installer):
-        whereami = self.installer.get_current_page()
-        if whereami == 4:
-            # Run this when the user cancels or exits at a sensitive time
-            message = gtk.MessageDialog(self.installer, gtk.DIALOG_MODAL, gtk.MESSAGE_WARNING, gtk.BUTTONS_YES_NO, "Are you sure you want to quit? The installation is not complete and you will not be able to use your SD card.")
-            response = message.run()
-            message.destroy()
-            if response == gtk.RESPONSE_YES:
-                if self.write_it.isAlive():
-                    self.write_it.handled = True
-                self.installer.destroy()
-                gtk.main_quit()
-                sys.exit()
-            else:
-                return
-
-        else:
-            # Run this when user cancels, exits or finishes
+        # Run this when the user cancels or exits at a sensitive time
+        message = gtk.MessageDialog(self.installer, gtk.DIALOG_MODAL, gtk.MESSAGE_WARNING, gtk.BUTTONS_YES_NO, "Are you sure you want to quit? The installation is not complete and you will not be able to use your SD card.\n\nIf a disk write operation is in progress, this will not be able to stop that process.")
+        response = message.run()
+        message.destroy()
+        if response == gtk.RESPONSE_YES:
             self.installer.destroy()
             gtk.main_quit()
+            os._exit(os.EX_OK)
+        else:
+            return
 
-    def sumfile(self, fobj):
-        # Returns an md5 hash for an object with read() method.
-        # See http://code.activestate.com/recipes/266486-simple-md5-sum-utility/
+    def md5sum(self, fname):
+        # Returns an md5 hash for the file parameter
+        f = file(fname, 'rb')
         m = md5.new()
         while True:
-            d = fobj.read(8096)
+            d = f.read(8096)
             if not d:
                 break
             m.update(d)
+        f.close()
         return m.hexdigest()
 
-    def md5sum(self, fname):
-        # Returns an md5 hash for file fname, or stdin if fname is "-".
-        # See http://code.activestate.com/recipes/266486-simple-md5-sum-utility/
-        if fname == '-':
-            ret = sumfile(self, sys.stdin)
+    def comparemd5(self):
+        # Creates an md5 hash for the package and compares it to authentic
+        pack_md5 = self.md5sum('latest.tar.gz')
+        file_md5 = open('latest.tar.gz.md5.txt')
+        compare_md5 = file_md5.read().decode("utf-8")
+        file_md5.close()
+        if not pack_md5 in compare_md5:
+            return 0
         else:
-            try:
-                f = file(fname, 'rb')
-            except:
-                return 'Failed to open file'
-            ret = self.sumfile(f)
-            f.close()
-        return ret
-        
-    def create_page0(self):
-        # Create introduction page
-        vbox = gtk.VBox()
-        vbox.set_border_width(5)
-        self.installer.append_page(vbox)
-        self.installer.set_page_title(vbox, "arkOS Installer")
-        self.installer.set_page_type(vbox, gtk.ASSISTANT_PAGE_INTRO)
-        label = gtk.Label("Welcome to the arkOS Installer! This program will guide you through installing the arkOS image to an SD card inserted into your computer.\n\nOnce you click Forward, your computer will start downloading the arkOS image from our servers in preparation for the install. Please make sure your computer is connected to the Internet before continuing.")
-        label.set_line_wrap(True)
-        vbox.pack_start(label, True, True, 0)
-        vbox.show_all()
-        self.installer.set_page_complete(vbox, True)
+            return 1
 
-    def create_page1(self):
-        # Create mirror chooser page
-        vbox = gtk.VBox()
-        vbox.set_border_width(5)
-        self.installer.append_page(vbox)
-        self.installer.set_page_title(vbox, "1 - Choose Mirror")
-        self.installer.set_page_type(vbox, gtk.ASSISTANT_PAGE_CONTENT)
-        self.download_override = False
-
-        # Check if file exists before prompting for download
+    def pkg_check(self):
+        # If package exists, check authenticity then skip download if necessary
+        self.greeting.set_text("<b>Package found!</b> Checking authenticity...")
+        self.greeting.set_use_markup(gtk.TRUE)
         if os.path.exists("latest.tar.gz"):
             if os.path.exists("latest.tar.gz.md5.txt"):
                 result = self.comparemd5()
@@ -151,6 +121,30 @@ class Installer:
                     self.download_override = True
         elif os.path.exists("latest.tar.gz.md5.txt"):
             os.remove("latest.tar.gz.md5.txt")
+        self.greeting.set_text("Welcome to the arkOS Installer! This program will guide you through installing the arkOS image to an SD card inserted into your computer.\n\nOnce you click Forward, your computer will start downloading the arkOS image from our servers in preparation for the install. Please make sure your computer is connected to the Internet before continuing.")
+
+        
+    def create_page0(self):
+        # Create introduction page
+        vbox = gtk.VBox()
+        vbox.set_border_width(5)
+        self.installer.append_page(vbox)
+        self.installer.set_page_title(vbox, "arkOS Installer")
+        self.installer.set_page_type(vbox, gtk.ASSISTANT_PAGE_INTRO)
+        self.greeting = gtk.Label("Welcome to the arkOS Installer! This program will guide you through installing the arkOS image to an SD card inserted into your computer.\n\nOnce you click Forward, your computer will start downloading the arkOS image from our servers in preparation for the install. Please make sure your computer is connected to the Internet before continuing.")
+        self.greeting.set_line_wrap(True)
+        vbox.pack_start(self.greeting, True, True, 0)
+        vbox.show_all()
+        self.installer.set_page_complete(vbox, True)
+
+    def create_page1(self):
+        # Create mirror chooser page
+        vbox = gtk.VBox()
+        vbox.set_border_width(5)
+        self.installer.append_page(vbox)
+        self.installer.set_page_title(vbox, "1 - Choose Mirror")
+        self.installer.set_page_type(vbox, gtk.ASSISTANT_PAGE_CONTENT)
+        self.download_override = False
 
         if self.download_override == True:
             label = gtk.Label("The installer found an apparently healthy image in this folder.\nIt will install this image instead of downloading another.")
@@ -265,7 +259,8 @@ class Installer:
         self.installer.append_page(self.summary)
         self.installer.set_page_title(self.summary, "3 - Confirm")
         self.installer.set_page_type(self.summary, gtk.ASSISTANT_PAGE_CONTENT)
-        self.confirmlabel = gtk.Label("Please confirm the details below. Once you click Start, the selected device will be erased and data will be overwritten.")
+        self.confirmlabel = gtk.Label("Please confirm the details below. Once you click Start, the download will begin, then the selected device will be erased and data will be overwritten.\n\n<b>NOTE that there is no way to halt the writing process once it begins.</b>")
+        self.confirmlabel.set_use_markup(gtk.TRUE)
         self.confirmlabel.set_line_wrap(True)
         self.summary.pack_start(self.confirmlabel, True, True, 0)
 
@@ -307,7 +302,7 @@ class Installer:
         self.installpage.set_border_width(5)
         self.installer.append_page(self.installpage)
         self.installer.set_page_title(self.installpage, "Installing arkOS")
-        self.installer.set_page_type(self.installpage, gtk.ASSISTANT_PAGE_PROGRESS)
+        self.installer.set_page_type(self.installpage, gtk.ASSISTANT_PAGE_CONTENT)
         self.installer.commit()
         self.download_label = gtk.Label(" ")
         self.imgwriter_label = gtk.Label(" ")
@@ -353,7 +348,12 @@ class Installer:
                 self.create_page5()
                 self.installer.set_current_page(5)
         else:
-            self.downloader()
+            self.download_label.set_text("<b>Downloading image from " + self.mirror + "...</b>")
+            self.download_label.set_use_markup(gtk.TRUE)
+            self.download_label.set_line_wrap(True)
+            self.download_it = Downloader(self, self.dlink, 'latest.tar.gz.md5.txt', 'latest.tar.gz')
+            self.download_label.set_text("Downloading image from " + self.mirror + "... <b>DONE</b>")
+            self.download_label.set_use_markup(gtk.TRUE)
             md5error = self.comparemd5()
             if md5error == 0:
                 installer.destroy()
@@ -377,58 +377,14 @@ class Installer:
                 self.create_page5()
                 self.installer.set_current_page(5)
 
-    def downloader(self):
-        # Download the latest installation image to disk
-        self.download_label.set_text("<b>Downloading image from " + self.mirror + "...</b>")
-        self.download_label.set_use_markup(gtk.TRUE)
-        self.download_label.set_line_wrap(True)
-        self.link = self.dlink + "/latest.tar.gz"
-        self.md5link = self.dlink + "/latest.tar.gz.md5.txt"
-        self.dlmd5 = urllib2.urlopen(self.md5link)
-        md5File = open('latest.tar.gz.md5.txt', 'w')
-        self.size_read(self.dlmd5, md5File, 8192, self.progbar_dl)
-        md5File.close()
-        self.dl = urllib2.urlopen(self.link)
-        dlFile = open('latest.tar.gz', 'w')
-        self.size_read(self.dl, dlFile, 8192, self.progbar_dl)
-        dlFile.close()
-        self.download_label.set_text("Downloading image from " + self.mirror + "... <b>DONE</b>")
-        self.download_label.set_use_markup(gtk.TRUE)
-
-    def comparemd5(self):
-        pack_md5 = self.md5sum('latest.tar.gz')
-        file_md5 = open('latest.tar.gz.md5.txt')
-        compare_md5 = file_md5.read().decode("utf-8")
-        file_md5.close()
-        if not pack_md5 in compare_md5:
-            return 0
-        else:
-            return 1
-
-    def size_read(self, response, file, chunk_size, report_hook):
-        # Continually compare the amount downloaded with what is left to get
-        total_size = response.info().getheader('Content-Length').strip()
-        total_size = int(total_size)
-        bytes_so_far = 0
-        while 1:
-            chunk = response.read(chunk_size)
-            file.write(chunk)
-            bytes_so_far += len(chunk)
-            if not chunk:
-                break
-            if report_hook:
-                report_hook(bytes_so_far, chunk_size, total_size)
-            while gtk.events_pending():
-                gtk.main_iteration()
-        return bytes_so_far
-
-    def progbar_dl(self, bytes_so_far, chunk_size, total_size):
+    def update_progress(self, bytes_so_far, chunk_size, total_size):
         # Looped function to update the progressbar for download
         percent = float(bytes_so_far) / total_size
         self.progressbar.set_fraction(percent)
         percent = round(percent*100, 2)
         self.progressbar.set_text("%0.2f of %0.2f MiB (%0.2f%%)" %
             (float(bytes_so_far)/1048576, float(total_size)/1048576, percent))
+        return True
 
     def create_page5(self):
         # Create the final page with successful message
@@ -453,6 +409,42 @@ class ImgWriter(threading.Thread):
     def run(self):
         os.system("tar -xzOf latest.tar.gz | dd bs=1M of=" + self.device)
         os.system("blockdev --rereadpt " + self.device)
+
+class Downloader(threading.Thread):
+    # Handles the thread for download operations
+    def __init__(self, delegate, mirror, *args):
+        threading.Thread.__init__(self)
+        self.delegate = delegate
+        self.mirror = mirror + "/"
+        self.filenames = []
+        for filename in args:
+            self.filenames.append(filename)
+        self.start()
+
+    def run(self):
+        # Download the files and report their status
+        for filename in self.filenames:
+            print filename
+            link = self.mirror + filename
+            dl_file = urllib2.urlopen(link)
+            io_file = open(filename, 'w')
+            self.size_read(dl_file, io_file, 8192)
+            io_file.close()
+
+    def size_read(self, response, file, chunk_size):
+        # Continually compare the amount downloaded with what is left to get
+        # Then pass that data back to the main thread to update the progressbar
+        total_size = response.info().getheader('Content-Length').strip()
+        total_size = int(total_size)
+        bytes_so_far = 0
+        while 1:
+            chunk = response.read(chunk_size)
+            file.write(chunk)
+            bytes_so_far += len(chunk)
+            if not chunk:
+                break
+            gobject.idle_add(self.delegate.update_progress, bytes_so_far, chunk_size, total_size)
+        return bytes_so_far
 
 def main():
     checker()

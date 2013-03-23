@@ -10,6 +10,8 @@ The arkOS Installer is an interactive graphical program allowing the user to cho
 
 Check out the Downloads page at https://ark-os.org/downloads for stable installation packages. It is only advised to clone this repo if you plan on making contributions or bugfixes, which are totally welcome!
 
+Run the file with root privileges in order to install.
+
 ## To Add
 
 * Clean up code and add better error handling
