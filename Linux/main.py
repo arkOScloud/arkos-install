@@ -216,13 +216,17 @@ class Installer:
             while download.isAlive():
                 while gtk.events_pending():
                     gtk.main_iteration()
+            download_result = self.queue.get()
+            if download_result != 200:
+                error_handler("The file could not be downloaded. Please check your Internet connection. If the problem persists and your connection is fine, please contact the arkOS maintainers.\n\nHTTP Error " + str(download_result))
+                return
             download = Downloader(self.progressbar, self.queue, self.mirror_link, 'latest.tar.gz')
             download.start()
             while download.isAlive():
                 while gtk.events_pending():
                     gtk.main_iteration()
             download_result = self.queue.get()
-            if download_result:
+            if download_result != 200:
                 error_handler("The file could not be downloaded. Please check your Internet connection. If the problem persists and your connection is fine, please contact the arkOS maintainers.\n\nHTTP Error " + str(download_result))
                 return
             self.download_label.set_text("Downloading image from " + self.mirror_name + "... <b>DONE</b>")
@@ -430,6 +434,7 @@ class Downloader(Thread):
         io_file = open(self.filename, 'w')
         self.size_read(dl_file, io_file, 8192)
         io_file.close()
+        self.queue.put(200)
 
     def size_read(self, response, file, chunk_size):
         # Continually compare the amount downloaded with what is left to get
