@@ -476,27 +476,6 @@ class ImgWriter(Thread):
             error_handler("The disk writing process failed with the following error:\n\n" + error)
         Popen(['blockdev', '--rereadpt', self.device])
 
-        # Resize the image
-        repart = Popen(['fdisk', self.device], stdin=PIPE, stderr=PIPE)
-        error = repart.communicate(input='d\n2\nn\np\n2\n\n\nw\n')[1]
-        if error:
-            error_handler("The disk partition process failed with the following error:\n\n" + self.error)
-        if "hd" in self.device or "sd" in self.device:
-            partition = self.device + "2"
-        elif "mmcblk" in self.device:
-            partition = self.device + "p2"
-        else:
-            error_handler("The image was written successfully, but I couldn't identify the block type. The partition must be resized manually.")
-
-        resize = Popen(['resize2fs', partition], stdout=PIPE, stderr=PIPE)
-        error = resize.communicate()[1]
-        if "e2fsck" in error:
-            check = Popen(['e2fsck', '-fy', partition], stderr=STDOUT)
-            check.communicate()[1]
-            resize = Popen(['resize2fs', partition], stderr=STDOUT)
-            resize.communicate()[1]
-        elif "error" in error or "failed" in error:
-            error_handler("The disk resize process failed with the following error:\n\n" + resize)
 
 def main():
     check_priv()
