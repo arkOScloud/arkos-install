@@ -1,9 +1,0 @@
-[Unit]
-Description=Update arkOS low-level configuration
- 
-[Service]
-Type=oneshot
-ExecStart=/usr/bin/confmon.py
- 
-[Install]
-WantedBy=multi-user.target
