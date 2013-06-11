@@ -4,7 +4,7 @@
 ##
 ##  arkOS Installer for Linux
 ##  Copyright (C) 2013 Jacob Cook
-##  jacob@ark-os.org
+##  jacob@citizenweb.is
 ##
 ##  Uses elements of Raspbmc Installer, (C) 2013 Sam Nazarko
 ##

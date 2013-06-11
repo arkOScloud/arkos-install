@@ -4,7 +4,7 @@
 ##
 ##  arkOS Installer for Linux
 ##  Copyright (C) 2013 Jacob Cook
-##  jacob@ark-os.org
+##  jacob@citizenweb.is
 ##
 ##  Uses elements of Raspbmc Installer, (C) 2013 Sam Nazarko
 ##
@@ -71,7 +71,7 @@ class Installer:
 
         self.queue = Queue()
         self.mirror_name = "New York (United States)"
-        self.mirror_link = "https://uspx.ark-os.org"
+        self.mirror_link = "https://uspx.arkos.io"
         self.device = "null"
 
         # Initialize basic pages
@@ -143,7 +143,7 @@ class Installer:
                     label.set_text("Authentic package found in working directory. Skipping download...")
                     return 1
             else:
-                dl_md5 = urlopen("https://uspx.ark-os.org/latest.tar.gz.md5.txt")
+                dl_md5 = urlopen("https://uspx.arkos.io/latest.tar.gz.md5.txt")
                 md5_File = open('latest.tar.gz.md5.txt', 'w')
                 md5_File.write(dl_md5.read())
                 md5_File.close()
@@ -167,10 +167,10 @@ class Installer:
         # Remember the chosen mirror
         if choice == "0":
             self.mirror_name = "New York (United States)"
-            self.mirror_link = "https://uspx.ark-os.org"
+            self.mirror_link = "https://uspx.arkos.io"
         else:
             self.mirror_name = "Amsterdam (The Netherlands)"
-            self.mirror_link = "https://eupx.ark-os.org"
+            self.mirror_link = "https://eupx.arkos.io"
 
         self.dl_label.set_text(self.mirror_name)
         self.link_label.set_text(self.mirror_link)

@@ -10,6 +10,6 @@ If the Installer finds an authorized installation image in the home folder (the 
 
 ## How To Install
 
-Check out the Downloads page at https://ark-os.org/downloads for stable installation packages. It is only advised to clone this repo if you plan on making contributions or bugfixes, which are totally welcome!
+Check out the Downloads page at https://arkos.io/downloads for stable installation packages. It is only advised to clone this repo if you plan on making contributions or bugfixes, which are totally welcome!
 
 To use without installing a package, run Install.py.
