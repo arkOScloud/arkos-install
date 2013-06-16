@@ -241,12 +241,15 @@ class Installer:
         self.imgwriter_label.set_use_markup(gtk.TRUE)
         self.progressbar.set_fraction(0.0)
         self.progressbar.set_text(" ")
-        write = ImgWriter(self.device)
+        write = ImgWriter(self.queue, self.device)
         while write.isAlive():
             self.progressbar.pulse()
             while gtk.events_pending():
                 gtk.main_iteration()
             sleep(0.1)
+        write_result = self.queue.get()
+        if write_result != False:
+            error_handler("The disk writing process failed with the following error:\n\n" + write_result)
         self.imgwriter_label.set_text("Copying image to " + self.device + "... <b>DONE</b>")
         self.imgwriter_label.set_use_markup(gtk.TRUE)
         self.installer.set_current_page(5)
@@ -457,15 +460,16 @@ class Downloader(Thread):
         percent = float(bytes_so_far) / total_size
         idle_add(self.progressbar.set_fraction, percent)
         percent = round(percent*100, 2)
-        idle_add(self.progressbar.set_text, "%0.2f of %0.2f MiB (%0.2f%%)" %
+        idle_add(self.progressbar.set_text, "%0.1f of %0.1f MiB (%0.0f%%)" %
             (float(bytes_so_far)/1048576, float(total_size)/1048576, percent))
         return True
 
 class ImgWriter(Thread):
     # Writes the downloaded image to disk
-    def __init__(self, device):
+    def __init__(self, queue, device):
         Thread.__init__(self)
         self.device = device
+        self.queue = queue
         self.start()
 
     def run(self):
@@ -473,9 +477,11 @@ class ImgWriter(Thread):
         unzip = Popen(['tar', 'xzOf', 'latest.tar.gz'], stdout=PIPE)
         dd = Popen(['dd', 'status=noxfer', 'bs=1M', 'of=' + self.device], stdin=unzip.stdout, stderr=PIPE)
         error = dd.communicate()[1]
-        if not "records out" in error:
-            error_handler("The disk writing process failed with the following error:\n\n" + error)
-        Popen(['blockdev', '--rereadpt', self.device])
+        if "error" in error:
+            self.queue.put(error)
+        else:
+            self.queue.put(False)
+            Popen(['blockdev', '--rereadpt', self.device])
 
 
 def main():
