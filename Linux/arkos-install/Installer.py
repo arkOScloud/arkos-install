@@ -187,18 +187,20 @@ class Installer:
         list_store.clear()
         self.installer.set_page_complete(page, False)
         num = 0
-        fdisk = Popen(['fdisk', '-l'], stdout=PIPE)
-        for lines in fdisk.stdout.readlines():
-            if lines.startswith("/dev/"):
+        fdisk = Popen(['fdisk', '-l'], stdout=PIPE).stdout.readlines()
+        mounts = Popen(['mount'], stdout=PIPE).stdout.readlines()
+        for lines in fdisk:
+            if lines.startswith("/dev/") or lines.find("/dev/") == -1:
                 continue
-            if lines.find("/dev/") == -1:
-                continue
-            num = num + 1
             dev = lines.split()[1].rstrip(":")
-            size = lines.split()[2]
-            unit = lines.split()[3].rstrip(",")
-            dev_store = [num, dev, size, unit]
-            list_store.append([dev_store[0], dev_store[1], dev_store[2], dev_store[3]])
+            for thing in mounts:
+                if dev in thing.split()[0] and thing.split()[2] == '/':
+                    break
+            else:
+                size = lines.split()[2]
+                unit = lines.split()[3].rstrip(",")
+                num = num + 1
+                list_store.append([num, dev, size, unit])
 
     def choose_device(self, element, page, tree_view, list_store):
         # Remember the chosen device
