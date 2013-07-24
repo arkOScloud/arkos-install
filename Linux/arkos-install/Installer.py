@@ -24,13 +24,16 @@
 ########################################################################
 
 import gtk
+import json
 import os
+import socket
 import sys
+import xml.etree.ElementTree as ET
 
 from gobject import idle_add, threads_init
 from md5 import new
 from Queue import Queue
-from subprocess import Popen, PIPE, STDOUT
+from subprocess import check_output, Popen, PIPE, STDOUT
 from sys import exit
 from time import sleep
 from threading import Thread
@@ -54,11 +57,19 @@ def check_priv():
     elif os.geteuid() != 0:
         error_handler("You do not have sufficient privileges to run this program. Please run Installer.py, or 'sudo ./main.py' instead.")
 
-def error_handler(errormsg):
+def error_handler(msg, close=True):
     # Throw up an error with the appropriate message and quit the application
-    message = gtk.MessageDialog(None, 0, gtk.MESSAGE_ERROR, gtk.BUTTONS_OK, errormsg)
+    message = gtk.MessageDialog(None, 0, gtk.MESSAGE_ERROR, gtk.BUTTONS_OK, msg)
     message.run()
-    os._exit(os.EX_CONFIG)
+    if close is True:
+        os._exit(os.EX_CONFIG)
+
+def success_handler(msg, close=False):
+    # Throw up an error with the appropriate message and quit the application
+    message = gtk.MessageDialog(None, 0, gtk.MESSAGE_INFO, gtk.BUTTONS_OK, msg)
+    message.run()
+    if close is True:
+        os._exit(os.EX_CONFIG)
 
 
 class Installer:
@@ -96,15 +107,17 @@ class Installer:
         bbox.pack_start(image, False, False, 3)
         bbox.pack_start(blabel, False, False, 3)
         vbox.pack_start(button, True, True, 0)
+
         image = gtk.Image()
         image.set_from_stock(gtk.STOCK_NETWORK, gtk.ICON_SIZE_BUTTON)
         bbox = gtk.HBox(False, 0)
         bbox.set_border_width(2)
         blabel = gtk.Label("Search the network for arkOS devices")
-        bbox.pack_start(image, False, False, 3)
-        bbox.pack_start(blabel, False, False, 3)
         button = gtk.Button()
         button.add(bbox)
+        button.connect("clicked", self.create_finder)
+        bbox.pack_start(image, False, False, 3)
+        bbox.pack_start(blabel, False, False, 3)
         vbox.pack_start(button, True, True, 0)
 
         vbox.show_all()
@@ -113,7 +126,102 @@ class Installer:
 
     def create_finder(self, btn):
         # Create finder window
-        pass
+        self.chdlg.hide()
+        self.fidlg = gtk.Window(gtk.WINDOW_TOPLEVEL)
+        self.fidlg.set_default_size(640, 400)
+        self.fidlg.set_geometry_hints(self.fidlg, 640, 400)
+        self.fidlg.set_border_width(20)
+        self.fidlg.set_title("arkOS Installer")
+        self.fidlg.set_icon_from_file(os.path.join(os.path.dirname(__file__), 'images/icon.png'))
+        self.fidlg.set_position(gtk.WIN_POS_CENTER)
+        self.fidlg.connect("destroy", lambda w: gtk.main_quit())
+
+        self.node = "null"
+        vbox = gtk.VBox()
+
+        # Create list of devices
+        list_store = gtk.ListStore(int, str, str, str)
+        tree_view = gtk.TreeView(list_store)
+
+        cell = gtk.CellRendererText()
+        column = gtk.TreeViewColumn("#", cell, text=0)
+        column.set_sort_column_id(0)
+        tree_view.append_column(column)
+        cell = gtk.CellRendererText()
+        column = gtk.TreeViewColumn("Name", cell, text=1)
+        column.set_min_width(250)
+        column.set_sort_column_id(1)
+        tree_view.append_column(column)
+        cell = gtk.CellRendererText()
+        column = gtk.TreeViewColumn("IP Address", cell, text=2)
+        column.set_min_width(100)
+        column.set_sort_column_id(2)
+        tree_view.append_column(column)
+        cell = gtk.CellRendererText()
+        column = gtk.TreeViewColumn("Genesis Status", cell, text=3)
+        column.set_sort_column_id(3)
+        tree_view.append_column(column)
+
+        table = gtk.Table(1, 4, True)
+
+        image = gtk.Image()
+        image.set_from_stock(gtk.STOCK_FIND, gtk.ICON_SIZE_BUTTON)
+        bbox = gtk.HBox(False, 0)
+        bbox.set_border_width(2)
+        blabel = gtk.Label("Scan")
+        button = gtk.Button()
+        button.add(bbox)
+        button.connect("clicked", self.poll_nodes, vbox, list_store)
+        bbox.pack_start(image, False, False, 3)
+        bbox.pack_start(blabel, False, False, 3)
+        table.attach(button, 0, 1, 0, 1)
+        
+        image = gtk.Image()
+        image.set_from_stock(gtk.STOCK_STOP, gtk.ICON_SIZE_BUTTON)
+        bbox = gtk.HBox(False, 0)
+        bbox.set_border_width(2)
+        blabel = gtk.Label("Shutdown")
+        button = gtk.Button()
+        button.add(bbox)
+        button.connect("clicked", self.sig_node, 'shutdown', self.node)
+        bbox.pack_start(image, False, False, 3)
+        bbox.pack_start(blabel, False, False, 3)
+        table.attach(button, 1, 2, 0, 1)
+
+        image = gtk.Image()
+        image.set_from_stock(gtk.STOCK_REFRESH, gtk.ICON_SIZE_BUTTON)
+        bbox = gtk.HBox(False, 0)
+        bbox.set_border_width(2)
+        blabel = gtk.Label("Reboot")
+        button = gtk.Button()
+        button.add(bbox)
+        button.connect("clicked", self.sig_node, 'reboot', self.node)
+        bbox.pack_start(image, False, False, 3)
+        bbox.pack_start(blabel, False, False, 3)
+        table.attach(button, 2, 3, 0, 1)
+
+        image = gtk.Image()
+        image.set_from_stock(gtk.STOCK_REFRESH, gtk.ICON_SIZE_BUTTON)
+        bbox = gtk.HBox(False, 0)
+        bbox.set_border_width(2)
+        blabel = gtk.Label("Reload Genesis")
+        button = gtk.Button()
+        button.add(bbox)
+        button.connect("clicked", self.sig_node, 'reload', self.node)
+        bbox.pack_start(image, False, False, 3)
+        bbox.pack_start(blabel, False, False, 3)
+        table.attach(button, 3, 4, 0, 1)
+
+        tree_view.connect("cursor_changed", self.choose_node, vbox, tree_view, list_store)
+        scrolledw = gtk.ScrolledWindow()
+        scrolledw.set_policy(gtk.POLICY_NEVER, gtk.POLICY_AUTOMATIC)
+        scrolledw.add(tree_view)
+        vbox.add(scrolledw)
+        vbox.add(table)
+
+        vbox.show_all()
+        self.fidlg.add(vbox)
+        self.fidlg.show()
 
     def create_installer(self, btn):
         # Create installer window
@@ -232,6 +340,73 @@ class Installer:
         self.dl_label.set_text(self.mirror_name)
         self.link_label.set_text(self.mirror_link)
 
+    def sig_node(self, btn, r, ip):
+        dialog = gtk.Dialog("Authenticate", None, 0, None)
+        label = gtk.Label("Give the user/password of a qualified user\non the device")
+        dialog.vbox.pack_start(label, True, True, 0)
+        label.show()
+        dialog.show()
+
+    def send_sig(self, btn, r, ip, user, passwd):
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        try:
+            s.connect((ip, 8765))
+            sslSocket = socket.ssl(s)
+            sslSocket.write(json.dumps({
+                'request': r,
+                'user': user,
+                'pass': passwd,
+                }))
+            rsp = json.loads(sslSocket.read())
+            if rsp['response'] is 'ok':
+                success_handler('Signal to %s sent successfully.' % r)
+            s.close()
+        except Exception, e:
+            error_handler('There was an error processing your request.\n\n' + str(e))
+
+    def poll_nodes(self, element, window, list_store):
+        list_store.clear()
+        num = 0
+        nodes = []
+        addrrange = '192.168.0.0/24'
+
+        # Step 1: find all RPis on the network
+        scan = check_output(['nmap', '-oX', '-', '-sn', addrrange])
+        hosts = ET.fromstring(scan)
+        ips = []
+        rpis = hosts.findall('.//address[@vendor="Raspberry Pi Foundation"]/..')
+        for rpi in rpis:
+            ips.append(rpi.find('.//address[@addrtype="ipv4"]').attrib['addr'])
+
+        # Step 2: scan these RPis for Beacon instances
+        for ip in ips:
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            try:
+                s.connect((ip, 8765))
+                sslSocket = socket.ssl(s)
+                sslSocket.write(json.dumps({
+                    'request': 'status'
+                    }))
+                rsp = json.loads(sslSocket.read())
+                if rsp['response'] is 'ok':
+                    nodes.append([num + 1, 
+                        rsp['name'], 
+                        ip, 
+                        rsp['status']
+                        ])
+                s.close()
+            except:
+                nodes.append([num + 1,
+                    'Unknown (Raspberry Pi)',
+                    ip,
+                    'Unknown'
+                    ])
+                s.close()
+
+        # Step 3: format the list of RPis and statuses into the GUI list
+        for node in nodes:
+            list_store.append([node[0], node[1], node[2], node[3]])
+
     def poll_devices(self, element, page, list_store):
         # Pull up the list of connected disks
         list_store.clear()
@@ -251,6 +426,11 @@ class Installer:
                 unit = lines.split()[3].rstrip(",")
                 num = num + 1
                 list_store.append([num, dev, size, unit])
+
+    def choose_node(self, element, page, tree_view, list_store):
+        # Remember the chosen node
+        (model, iter) = tree_view.get_selection().get_selected()
+        self.node = list_store.get_value(iter, 2)
 
     def choose_device(self, element, page, tree_view, list_store):
         # Remember the chosen device
