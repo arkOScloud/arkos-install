@@ -68,11 +68,61 @@ class Installer:
     ###################################################
 
     def __init__(self):
-        # Create window
+        # Create choice window
+        self.chdlg = gtk.Window(gtk.WINDOW_TOPLEVEL)
+        self.chdlg.set_default_size(375, 200)
+        self.chdlg.set_geometry_hints(self.chdlg, 375, 200)
+        self.chdlg.set_border_width(20)
+        self.chdlg.set_title("arkOS Installer")
+        self.chdlg.set_icon_from_file(os.path.join(os.path.dirname(__file__), 'images/icon.png'))
+        self.chdlg.set_position(gtk.WIN_POS_CENTER)
+        self.chdlg.connect("destroy", lambda w: gtk.main_quit())
+
+        vbox = gtk.VBox()
+        labels = gtk.VBox()
+
+        image = gtk.Image()
+        image.set_from_file(os.path.join(os.path.dirname(__file__), 'images/header.png'))
+        vbox.pack_start(image, False, True, 10)
+
+        image = gtk.Image()
+        image.set_from_stock(gtk.STOCK_HARDDISK, gtk.ICON_SIZE_BUTTON)
+        bbox = gtk.HBox(False, 0)
+        bbox.set_border_width(2)
+        blabel = gtk.Label("Install arkOS to an SD card")
+        button = gtk.Button()
+        button.add(bbox)
+        button.connect("clicked", self.create_installer)
+        bbox.pack_start(image, False, False, 3)
+        bbox.pack_start(blabel, False, False, 3)
+        vbox.pack_start(button, True, True, 0)
+        image = gtk.Image()
+        image.set_from_stock(gtk.STOCK_NETWORK, gtk.ICON_SIZE_BUTTON)
+        bbox = gtk.HBox(False, 0)
+        bbox.set_border_width(2)
+        blabel = gtk.Label("Search the network for arkOS devices")
+        bbox.pack_start(image, False, False, 3)
+        bbox.pack_start(blabel, False, False, 3)
+        button = gtk.Button()
+        button.add(bbox)
+        vbox.pack_start(button, True, True, 0)
+
+        vbox.show_all()
+        self.chdlg.add(vbox)
+        self.chdlg.show()
+
+    def create_finder(self, btn):
+        # Create finder window
+        pass
+
+    def create_installer(self, btn):
+        # Create installer window
+        self.chdlg.hide()
         self.installer = gtk.Assistant()
         self.installer.set_default_size(640, 400)
         self.installer.set_geometry_hints(self.installer, 640, 400)
         self.installer.set_title("arkOS Installer")
+        self.installer.set_position(gtk.WIN_POS_CENTER)
         self.installer.connect("cancel", self.quit_now)
         self.installer.connect("close", self.quit)
 
