@@ -61,13 +61,15 @@ def error_handler(msg, close=True):
     # Throw up an error with the appropriate message and quit the application
     message = gtk.MessageDialog(None, 0, gtk.MESSAGE_ERROR, gtk.BUTTONS_OK, msg)
     message.run()
+    message.destroy()
     if close is True:
         os._exit(os.EX_CONFIG)
 
 def success_handler(msg, close=False):
-    # Throw up an error with the appropriate message and quit the application
+    # Throw up a success message
     message = gtk.MessageDialog(None, 0, gtk.MESSAGE_INFO, gtk.BUTTONS_OK, msg)
     message.run()
+    message.destroy()
     if close is True:
         os._exit(os.EX_CONFIG)
 
@@ -183,7 +185,7 @@ class Installer:
         blabel = gtk.Label("Shutdown")
         button = gtk.Button()
         button.add(bbox)
-        button.connect("clicked", self.sig_node, 'shutdown', self.node)
+        button.connect("clicked", self.sig_node, 'shutdown')
         bbox.pack_start(image, False, False, 3)
         bbox.pack_start(blabel, False, False, 3)
         table.attach(button, 1, 2, 0, 1)
@@ -195,7 +197,7 @@ class Installer:
         blabel = gtk.Label("Reboot")
         button = gtk.Button()
         button.add(bbox)
-        button.connect("clicked", self.sig_node, 'reboot', self.node)
+        button.connect("clicked", self.sig_node, 'reboot')
         bbox.pack_start(image, False, False, 3)
         bbox.pack_start(blabel, False, False, 3)
         table.attach(button, 2, 3, 0, 1)
@@ -207,17 +209,18 @@ class Installer:
         blabel = gtk.Label("Reload Genesis")
         button = gtk.Button()
         button.add(bbox)
-        button.connect("clicked", self.sig_node, 'reload', self.node)
+        button.connect("clicked", self.sig_node, 'reload')
         bbox.pack_start(image, False, False, 3)
         bbox.pack_start(blabel, False, False, 3)
         table.attach(button, 3, 4, 0, 1)
 
-        tree_view.connect("cursor_changed", self.choose_node, vbox, tree_view, list_store)
+        tree_selection = tree_view.get_selection()
+        tree_selection.connect("changed", self.choose_node, vbox, tree_view)
         scrolledw = gtk.ScrolledWindow()
         scrolledw.set_policy(gtk.POLICY_NEVER, gtk.POLICY_AUTOMATIC)
         scrolledw.add(tree_view)
-        vbox.add(scrolledw)
-        vbox.add(table)
+        vbox.pack_start(scrolledw, True, True, 0)
+        vbox.pack_start(table, False, True, 0)
 
         vbox.show_all()
         self.fidlg.add(vbox)
@@ -340,12 +343,51 @@ class Installer:
         self.dl_label.set_text(self.mirror_name)
         self.link_label.set_text(self.mirror_link)
 
-    def sig_node(self, btn, r, ip):
-        dialog = gtk.Dialog("Authenticate", None, 0, None)
-        label = gtk.Label("Give the user/password of a qualified user\non the device")
-        dialog.vbox.pack_start(label, True, True, 0)
-        label.show()
-        dialog.show()
+    def sig_node(self, btn, r):
+        self.authdlg = gtk.Dialog("Authenticate", None, 0, None)
+        self.authdlg.set_border_width(20)
+        label = gtk.Label("Give the username/password of a qualified user on the device")
+        label.set_line_wrap(True)
+        self.authdlg.vbox.pack_start(label, True, True, 0)
+        table = gtk.Table(2, 2, True)
+        ulabel = gtk.Label("Username")
+        table.attach(ulabel, 0, 1, 0, 1)
+        plabel = gtk.Label("Password")
+        table.attach(plabel, 0, 1, 1, 2)
+        uentry = gtk.Entry()
+        table.attach(uentry, 1, 2, 0, 1)
+        pentry = gtk.Entry()
+        passwd = pentry.get_text()
+        pentry.set_visibility(False)
+        table.attach(pentry, 1, 2, 1, 2)
+
+        image = gtk.Image()
+        image.set_from_stock(gtk.STOCK_CANCEL, gtk.ICON_SIZE_BUTTON)
+        bbox = gtk.HBox(False, 0)
+        bbox.set_border_width(2)
+        blabel = gtk.Label("Cancel")
+        button = gtk.Button()
+        button.add(bbox)
+        button.connect("clicked", lambda w: self.authdlg.destroy())
+        bbox.pack_start(image, False, False, 3)
+        bbox.pack_start(blabel, False, False, 3)
+        table.attach(button, 2, 3, 0, 1)
+
+        image = gtk.Image()
+        image.set_from_stock(gtk.STOCK_DIALOG_AUTHENTICATION, gtk.ICON_SIZE_BUTTON)
+        bbox = gtk.HBox(False, 0)
+        bbox.set_border_width(2)
+        blabel = gtk.Label("OK")
+        button = gtk.Button()
+        button.add(bbox)
+        button.connect("clicked", self.send_sig, r, self.node, uentry, pentry)
+        bbox.pack_start(image, False, False, 3)
+        bbox.pack_start(blabel, False, False, 3)
+        table.attach(button, 3, 4, 0, 1)
+
+        self.authdlg.vbox.add(table)
+        self.authdlg.vbox.show_all()
+        self.authdlg.show()
 
     def send_sig(self, btn, r, ip, user, passwd):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -354,15 +396,18 @@ class Installer:
             sslSocket = socket.ssl(s)
             sslSocket.write(json.dumps({
                 'request': r,
-                'user': user,
-                'pass': passwd,
+                'user': user.get_text(),
+                'pass': passwd.get_text(),
                 }))
             rsp = json.loads(sslSocket.read())
-            if rsp['response'] is 'ok':
+            if 'ok' in rsp['response']:
                 success_handler('Signal to %s sent successfully.' % r)
+                self.authdlg.destroy()
+            else:
+                error_handler('Authentification failed', close=False)
             s.close()
         except Exception, e:
-            error_handler('There was an error processing your request.\n\n' + str(e))
+            error_handler('There was an error processing your request.\n\n' + str(e), close=False)
 
     def poll_nodes(self, element, window, list_store):
         list_store.clear()
@@ -388,7 +433,7 @@ class Installer:
                     'request': 'status'
                     }))
                 rsp = json.loads(sslSocket.read())
-                if rsp['response'] is 'ok':
+                if 'ok' in rsp['response']:
                     nodes.append([num + 1, 
                         rsp['name'], 
                         ip, 
@@ -405,7 +450,7 @@ class Installer:
 
         # Step 3: format the list of RPis and statuses into the GUI list
         for node in nodes:
-            list_store.append([node[0], node[1], node[2], node[3]])
+            list_store.append(node)
 
     def poll_devices(self, element, page, list_store):
         # Pull up the list of connected disks
@@ -427,17 +472,26 @@ class Installer:
                 num = num + 1
                 list_store.append([num, dev, size, unit])
 
-    def choose_node(self, element, page, tree_view, list_store):
+    def choose_node(self, element, page, tree_view):
         # Remember the chosen node
-        (model, iter) = tree_view.get_selection().get_selected()
-        self.node = list_store.get_value(iter, 2)
+        treeselection = tree_view.get_selection()
+        model, iter = treeselection.get_selected()
+        if iter:
+            self.node = model.get_value(iter, 2)
+        else:
+            self.node = None
 
-    def choose_device(self, element, page, tree_view, list_store):
+    def choose_device(self, element, page, tree_view):
         # Remember the chosen device
-        (model, iter) = tree_view.get_selection().get_selected()
-        self.device = list_store.get_value(iter, 1)
-        self.installer.set_page_complete(page, True)
-        self.device_label.set_text(self.device)
+        treeselection = tree_view.get_selection()
+        model, iter = treeselection.get_selected()
+        if iter:
+            self.device = model.get_value(iter, 1)
+            self.installer.set_page_complete(page, True)
+            self.device_label.set_text(self.device)
+        else:
+            self.device = None
+            self.installer.set_page_complete(page, False)
 
     def install_handler(self, element, page):
         # Redo the Summary page to give install info, and switch pages.
@@ -566,7 +620,7 @@ class Installer:
         self.poll_devices(self, vbox, list_store)
         button = gtk.Button("Refresh")
         button.connect("clicked", self.poll_devices, vbox, list_store)
-        tree_view.connect("cursor_changed", self.choose_device, vbox, tree_view, list_store)
+        tree_view.connect("cursor_changed", self.choose_device, vbox, tree_view)
 
         # Make it scroll!
         vbox.pack_start(label, True, True, 0)
