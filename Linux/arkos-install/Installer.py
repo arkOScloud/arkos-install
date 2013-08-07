@@ -138,7 +138,8 @@ class Installer:
         self.fidlg.set_position(gtk.WIN_POS_CENTER)
         self.fidlg.connect("destroy", lambda w: gtk.main_quit())
 
-        self.node = "null"
+        self.nodetype = None
+        self.node = None
         vbox = gtk.VBox()
 
         # Create list of devices
@@ -344,50 +345,55 @@ class Installer:
         self.link_label.set_text(self.mirror_link)
 
     def sig_node(self, btn, r):
-        self.authdlg = gtk.Dialog("Authenticate", None, 0, None)
-        self.authdlg.set_border_width(20)
-        label = gtk.Label("Give the username/password of a qualified user on the device")
-        label.set_line_wrap(True)
-        self.authdlg.vbox.pack_start(label, True, True, 0)
-        table = gtk.Table(2, 2, True)
-        ulabel = gtk.Label("Username")
-        table.attach(ulabel, 0, 1, 0, 1)
-        plabel = gtk.Label("Password")
-        table.attach(plabel, 0, 1, 1, 2)
-        uentry = gtk.Entry()
-        table.attach(uentry, 1, 2, 0, 1)
-        pentry = gtk.Entry()
-        passwd = pentry.get_text()
-        pentry.set_visibility(False)
-        table.attach(pentry, 1, 2, 1, 2)
+        if self.node is None:
+            error_handler('Please make a selection', close=False)
+        elif self.nodetype.startswith('Unknown'):
+            error_handler('This feature can only be used on arkOS systems that have Beacon enabled', close=False)
+        else:
+            self.authdlg = gtk.Dialog("Authenticate", None, 0, None)
+            self.authdlg.set_border_width(20)
+            label = gtk.Label("Give the username/password of a qualified user on the device")
+            label.set_line_wrap(True)
+            self.authdlg.vbox.pack_start(label, True, True, 0)
+            table = gtk.Table(2, 2, True)
+            ulabel = gtk.Label("Username")
+            table.attach(ulabel, 0, 1, 0, 1)
+            plabel = gtk.Label("Password")
+            table.attach(plabel, 0, 1, 1, 2)
+            uentry = gtk.Entry()
+            table.attach(uentry, 1, 2, 0, 1)
+            pentry = gtk.Entry()
+            passwd = pentry.get_text()
+            pentry.set_visibility(False)
+            table.attach(pentry, 1, 2, 1, 2)
 
-        image = gtk.Image()
-        image.set_from_stock(gtk.STOCK_CANCEL, gtk.ICON_SIZE_BUTTON)
-        bbox = gtk.HBox(False, 0)
-        bbox.set_border_width(2)
-        blabel = gtk.Label("Cancel")
-        button = gtk.Button()
-        button.add(bbox)
-        button.connect("clicked", lambda w: self.authdlg.destroy())
-        bbox.pack_start(image, False, False, 3)
-        bbox.pack_start(blabel, False, False, 3)
-        table.attach(button, 2, 3, 0, 1)
+            image = gtk.Image()
+            image.set_from_stock(gtk.STOCK_CANCEL, gtk.ICON_SIZE_BUTTON)
+            bbox = gtk.HBox(False, 0)
+            bbox.set_border_width(2)
+            blabel = gtk.Label("Cancel")
+            button = gtk.Button()
+            button.add(bbox)
+            button.connect("clicked", lambda w: self.authdlg.destroy())
+            bbox.pack_start(image, False, False, 3)
+            bbox.pack_start(blabel, False, False, 3)
+            self.authdlg.action_area.add(button)
 
-        image = gtk.Image()
-        image.set_from_stock(gtk.STOCK_DIALOG_AUTHENTICATION, gtk.ICON_SIZE_BUTTON)
-        bbox = gtk.HBox(False, 0)
-        bbox.set_border_width(2)
-        blabel = gtk.Label("OK")
-        button = gtk.Button()
-        button.add(bbox)
-        button.connect("clicked", self.send_sig, r, self.node, uentry, pentry)
-        bbox.pack_start(image, False, False, 3)
-        bbox.pack_start(blabel, False, False, 3)
-        table.attach(button, 3, 4, 0, 1)
+            image = gtk.Image()
+            image.set_from_stock(gtk.STOCK_DIALOG_AUTHENTICATION, gtk.ICON_SIZE_BUTTON)
+            bbox = gtk.HBox(False, 0)
+            bbox.set_border_width(2)
+            blabel = gtk.Label("OK")
+            button = gtk.Button()
+            button.add(bbox)
+            button.connect("clicked", self.send_sig, r, self.node, uentry, pentry)
+            bbox.pack_start(image, False, False, 3)
+            bbox.pack_start(blabel, False, False, 3)
+            self.authdlg.action_area.add(button)
 
-        self.authdlg.vbox.add(table)
-        self.authdlg.vbox.show_all()
-        self.authdlg.show()
+            self.authdlg.vbox.add(table)
+            self.authdlg.vbox.show_all()
+            self.authdlg.show()
 
     def send_sig(self, btn, r, ip, user, passwd):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -477,8 +483,10 @@ class Installer:
         treeselection = tree_view.get_selection()
         model, iter = treeselection.get_selected()
         if iter:
+            self.nodetype = model.get_value(iter, 1)
             self.node = model.get_value(iter, 2)
         else:
+            self.nodetype = None
             self.node = None
 
     def choose_device(self, element, page, tree_view):
@@ -739,6 +747,7 @@ class Downloader(Thread):
         total_size = response.info().getheader('Content-Length').strip()
         total_size = int(total_size)
         bytes_so_far = 0
+        update = 0
         while 1:
             chunk = response.read(chunk_size)
             file.write(chunk)
