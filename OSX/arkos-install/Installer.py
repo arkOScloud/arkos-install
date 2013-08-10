@@ -2,7 +2,7 @@
 
 ########################################################################
 ##
-##  arkOS Installer for Linux
+##  arkOS Installer for Mac OS X
 ##  Copyright (C) 2013 Jacob Cook
 ##  jacob@citizenweb.is
 ##
@@ -99,14 +99,10 @@ class Assistant(QtGui.QWidget):
 
 	def check_priv(self):
 		# Make sure the user has the privileges necessary to run
-		if os.geteuid() != 0 and os.path.exists('/usr/bin/gksudo'):
-			subprocess.Popen(["gksudo", "-D arkOS Installer", sys.executable, os.path.realpath(__file__)])
-			os._exit(os.EX_CONFIG)
-		elif os.geteuid() != 0 and os.path.exists('/usr/bin/kdesudo'):
-			subprocess.Popen(["kdesudo", "--comment 'arkOS Installer'", sys.executable, os.path.realpath(__file__)])
-			os._exit(os.EX_CONFIG)
-		elif os.geteuid() != 0:
-			error_handler(self, "You do not have sufficient privileges to run this program. Please run Installer.py, or 'sudo ./main.py' instead.")
+		if os.geteuid() != 0:
+			error_handler(self, 'You do not have sufficient privileges '
+				'to run this program. Please run the arkOS Installer app'
+				'from your Applications folder.')
 
 	def installer(self):
 		self.install = Installer()
@@ -114,8 +110,15 @@ class Assistant(QtGui.QWidget):
 		self.close()
 
 	def finder(self):
-		self.find = Finder()
-		self.close()
+		nmap = subprocess.Popen(['which', 'nmap'], 
+			stdout=subprocess.PIPE).wait()
+		if nmap != 0:
+			error_handler(self, 'nmap was not found on this system. Please '
+				'reopen the arkOS Installer image and run the nmap installer.', 
+				close=False)
+		else:
+			self.find = Finder()
+			self.close()
 
 
 ###################################################
@@ -449,22 +452,17 @@ class ChooseDevicePage(QtGui.QWizardPage):
 		QtGui.QApplication.setOverrideCursor(QtGui.QCursor(QtCore.Qt.WaitCursor))
 		devices = []
 		num = 0
-		fdisk = subprocess.Popen(['fdisk', '-l'], 
+		diskutil = subprocess.Popen(['diskutil', 'list'], 
 			stdout=subprocess.PIPE).stdout.readlines()
-		mounts = subprocess.Popen(['mount'], 
-			stdout=subprocess.PIPE).stdout.readlines()
-		for lines in fdisk:
-			if lines.startswith("/dev/") or lines.find("/dev/") == -1:
+		for line in diskutil:
+			line = line.strip().split()
+			if line[0] != ('0:'):
 				continue
-			dev = lines.split()[1].rstrip(":")
-			for thing in mounts:
-				if dev in thing.split()[0] and thing.split()[2] == '/':
-					break
-			else:
-				size = lines.split()[2]
-				unit = lines.split()[3].rstrip(",")
-				num = num + 1
-				devices.append([num, dev, size, unit])
+			dev = line[4]
+			size = line[2]
+			unit = line[3]
+			num = num + 1
+			devices.append([num, dev, size, unit])
 
 		for device in devices:
 			devlist = QtGui.QTreeWidgetItem(self.tree_view)
@@ -837,7 +835,7 @@ class ImgWriter(QtCore.QThread):
 	# Writes the downloaded image to disk
 	def __init__(self, queue, device):
 		super(ImgWriter, self).__init__()
-		self.device = device
+		self.device = '/dev/r' + device
 		self.queue = queue
 
 	def run(self):
@@ -845,14 +843,13 @@ class ImgWriter(QtCore.QThread):
 		unzip = subprocess.Popen(['tar', 'xzOf', 'latest.tar.gz'], 
 			stdout=subprocess.PIPE)
 		dd = subprocess.Popen(
-			['dd', 'status=noxfer', 'bs=1M', 'of=' + self.device], 
+			['dd', 'status=noxfer', 'bs=1m', 'of=' + self.device], 
 			stdin=unzip.stdout, stderr=subprocess.PIPE)
 		error = dd.communicate()[1]
-		if "error" in error:
+		if "error" in error or "denied" in error:
 			self.queue.put(error)
 		else:
 			self.queue.put(False)
-			subprocess.Popen(['blockdev', '--rereadpt', self.device])
 
 
 def main():
