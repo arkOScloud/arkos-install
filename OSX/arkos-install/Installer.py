@@ -101,7 +101,7 @@ class Assistant(QtGui.QWidget):
 		# Make sure the user has the privileges necessary to run
 		if os.geteuid() != 0:
 			error_handler(self, 'You do not have sufficient privileges '
-				'to run this program. Please run the arkOS Installer app'
+				'to run this program. Please run the arkOS Installer app '
 				'from your Applications folder.')
 
 	def installer(self):
@@ -418,7 +418,7 @@ class ChooseDevicePage(QtGui.QWizardPage):
 		self.tree_view = QtGui.QTreeWidget()
 		self.tree_view.setHeaderLabels(['#', 'Device', 'Size', 'Unit'])
 		self.tree_view.setColumnWidth(0, 50)
-		self.tree_view.setColumnWidth(1, 400)
+		self.tree_view.setColumnWidth(1, 200)
 		self.tree_view.setColumnWidth(3, 50)
 		self.tree_view.setSortingEnabled(True)
 		self.tree_view.sortByColumn(0, QtCore.Qt.AscendingOrder)
@@ -454,15 +454,26 @@ class ChooseDevicePage(QtGui.QWizardPage):
 		num = 0
 		diskutil = subprocess.Popen(['diskutil', 'list'], 
 			stdout=subprocess.PIPE).stdout.readlines()
+		mounts = subprocess.Popen(['mount'], 
+			stdout=subprocess.PIPE).stdout.readlines()
 		for line in diskutil:
-			line = line.strip().split()
+			line = line.split()
 			if line[0] != ('0:'):
 				continue
-			dev = line[4]
-			size = line[2]
-			unit = line[3]
-			num = num + 1
-			devices.append([num, dev, size, unit])
+			try:
+				dev = line[4]
+				size = line[2].lstrip('*')
+				unit = line[3]
+			except IndexError:
+				dev = line[3]
+				size = line[1]
+				unit = line[2]
+			for mount in mounts:
+				if '/dev/'+dev in mount.split()[0] and mount.split()[2] == '/':
+					break
+			else:
+				num = num + 1
+				devices.append([num, dev, size, unit])
 
 		for device in devices:
 			devlist = QtGui.QTreeWidgetItem(self.tree_view)
@@ -531,6 +542,7 @@ class ActionPage(QtGui.QWizardPage):
 		self.btn.close()
 		self.dllabel = QtGui.QLabel("<b>Downloading image from " 
 			+ mirror_name + "...</b>")
+		self.dllabel.setWordWrap(True)
 		self.imglabel = QtGui.QLabel()
 		self.pblabel = QtGui.QLabel()
 		self.progressbar = QtGui.QProgressBar()
@@ -624,15 +636,14 @@ class ActionPage(QtGui.QWizardPage):
 
 	def updatebar(self, val, got, total):
 		self.progressbar.setValue(val)
-		self.datalabel.setText("%0.1f of %0.1f MB" % (got, total))
+		self.datalabel.setText("%0.1f of %0.1f MB - %d%%" % (got, total, val))
 
 	def pkg_check(self):
 		# If package exists, check authenticity then skip download if necessary
 		if os.path.exists('latest.tar.gz'):
 			self.dllabel.setText('<b>Package found in working directory!</b> '
 				'Checking authenticity...')
-			while QtGui.QApplication.hasPendingEvents():
-				QtGui.QApplication.processEvents()
+			QtGui.QApplication.processEvents()
 			if os.path.exists('latest.tar.gz.md5.txt'):
 				result = self.md5sum()
 				if result == 0:
@@ -835,7 +846,7 @@ class ImgWriter(QtCore.QThread):
 	# Writes the downloaded image to disk
 	def __init__(self, queue, device):
 		super(ImgWriter, self).__init__()
-		self.device = '/dev/r' + device
+		self.device = '/dev/' + device
 		self.queue = queue
 
 	def run(self):
@@ -843,7 +854,7 @@ class ImgWriter(QtCore.QThread):
 		unzip = subprocess.Popen(['tar', 'xzOf', 'latest.tar.gz'], 
 			stdout=subprocess.PIPE)
 		dd = subprocess.Popen(
-			['dd', 'status=noxfer', 'bs=1m', 'of=' + self.device], 
+			['dd', 'bs=1m', 'of=' + self.device], 
 			stdin=unzip.stdout, stderr=subprocess.PIPE)
 		error = dd.communicate()[1]
 		if "error" in error or "denied" in error:
