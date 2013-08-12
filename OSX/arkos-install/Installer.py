@@ -410,15 +410,15 @@ class ChooseDevicePage(QtGui.QWizardPage):
 		# Select a device to write to
 		self.setTitle('Choose Device')
 		label = QtGui.QLabel('Choose the appropriate device from the '
-			'list below. Note that it is very important to choose the '
-			'correct device! If you choose another one you may seriously '
-			'damage your system.')
+			'list below. Devices smaller than the minimum (2 GB) are not shown. '
+			'Note that it is very important to choose the correct device! '
+			'If you choose another one you may seriously damage your system.')
 		label.setWordWrap(True)
 
 		self.tree_view = QtGui.QTreeWidget()
 		self.tree_view.setHeaderLabels(['#', 'Device', 'Size', 'Unit'])
 		self.tree_view.setColumnWidth(0, 50)
-		self.tree_view.setColumnWidth(1, 200)
+		self.tree_view.setColumnWidth(1, 175)
 		self.tree_view.setColumnWidth(3, 50)
 		self.tree_view.setSortingEnabled(True)
 		self.tree_view.sortByColumn(0, QtCore.Qt.AscendingOrder)
@@ -468,6 +468,10 @@ class ChooseDevicePage(QtGui.QWizardPage):
 				dev = line[3]
 				size = line[1]
 				unit = line[2]
+			if unit == 'GB' and float(size) <= 2.0:
+				continue
+			elif unit == 'MB' and float(size) <= 2048.0:
+				continue
 			for mount in mounts:
 				if '/dev/'+dev in mount.split()[0] and mount.split()[2] == '/':
 					break
@@ -565,7 +569,6 @@ class ActionPage(QtGui.QWizardPage):
 
 			while self.download.isRunning():
 				QtGui.QApplication.processEvents()
-				time.sleep(0.1)
 
 			download_result = self.parent.queue.get()
 			if download_result != 200:
@@ -587,7 +590,6 @@ class ActionPage(QtGui.QWizardPage):
 
 			while self.download.isRunning():
 				QtGui.QApplication.processEvents()
-				time.sleep(0.1)
 
 			download_result = self.parent.queue.get()
 			if download_result != 200:
@@ -622,7 +624,6 @@ class ActionPage(QtGui.QWizardPage):
 
 		while self.write.isRunning():
 			QtGui.QApplication.processEvents()
-			time.sleep(0.1)
 
 		write_result = self.parent.queue.get()
 		if write_result != False:
@@ -851,12 +852,20 @@ class ImgWriter(QtCore.QThread):
 
 	def run(self):
 		# Write the image and refresh partition
+		ddcmd = ['dd', 'bs=1m', 'of=' + str(self.device)]
+		umcmd = ['diskutil', 'unmountDisk', str(self.device)]
+		try:
+			unmount = subprocess.Popen(umcmd).wait()
+		except subprocess.CalledProcessError:
+			self.queue.put('The drive could not be unmounted. '
+				'Make sure it is not in use before continuing.')
+			return
 		unzip = subprocess.Popen(['tar', 'xzOf', 'latest.tar.gz'], 
 			stdout=subprocess.PIPE)
-		dd = subprocess.Popen(
-			['dd', 'bs=1m', 'of=' + self.device], 
-			stdin=unzip.stdout, stderr=subprocess.PIPE)
+		dd = subprocess.Popen(ddcmd, stdin=unzip.stdout, 
+			stderr=subprocess.PIPE)
 		error = dd.communicate()[1]
+		print os.geteuid()
 		if "error" in error or "denied" in error:
 			self.queue.put(error)
 		else:

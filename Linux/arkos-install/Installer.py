@@ -407,15 +407,15 @@ class ChooseDevicePage(QtGui.QWizardPage):
 		# Select a device to write to
 		self.setTitle('Choose Device')
 		label = QtGui.QLabel('Choose the appropriate device from the '
-			'list below. Note that it is very important to choose the '
-			'correct device! If you choose another one you may seriously '
-			'damage your system.')
+			'list below. Devices smaller than the minimum (2 GB) are not shown. '
+			'Note that it is very important to choose the correct device! '
+			'If you choose another one you may seriously damage your system.')
 		label.setWordWrap(True)
 
 		self.tree_view = QtGui.QTreeWidget()
 		self.tree_view.setHeaderLabels(['#', 'Device', 'Size', 'Unit'])
 		self.tree_view.setColumnWidth(0, 50)
-		self.tree_view.setColumnWidth(1, 400)
+		self.tree_view.setColumnWidth(1, 375)
 		self.tree_view.setColumnWidth(3, 50)
 		self.tree_view.setSortingEnabled(True)
 		self.tree_view.sortByColumn(0, QtCore.Qt.AscendingOrder)
@@ -456,13 +456,20 @@ class ChooseDevicePage(QtGui.QWizardPage):
 		for lines in fdisk:
 			if lines.startswith("/dev/") or lines.find("/dev/") == -1:
 				continue
+				
 			dev = lines.split()[1].rstrip(":")
+			size = lines.split()[2]
+			unit = lines.split()[3].rstrip(",")
+
+			if unit == 'GB' and float(size) <= 2.0:
+				continue
+			elif unit == 'MB' and float(size) <= 2048.0:
+				continue
+
 			for thing in mounts:
 				if dev in thing.split()[0] and thing.split()[2] == '/':
 					break
 			else:
-				size = lines.split()[2]
-				unit = lines.split()[3].rstrip(",")
 				num = num + 1
 				devices.append([num, dev, size, unit])
 
@@ -612,7 +619,6 @@ class ActionPage(QtGui.QWizardPage):
 
 		while self.write.isRunning():
 			QtGui.QApplication.processEvents()
-			time.sleep(0.1)
 
 		write_result = self.parent.queue.get()
 		if write_result != False:
@@ -842,6 +848,11 @@ class ImgWriter(QtCore.QThread):
 
 	def run(self):
 		# Write the image and refresh partition
+		mounts = subprocess.Popen(['mount'], 
+			stdout=subprocess.PIPE).stdout.readlines()
+		for thing in mounts:
+			if str(self.device) in thing.split()[0]:
+				cmd = subprocess.Popen(['umount', str(thing).split()[0]]).wait()
 		unzip = subprocess.Popen(['tar', 'xzOf', 'latest.tar.gz'], 
 			stdout=subprocess.PIPE)
 		dd = subprocess.Popen(
