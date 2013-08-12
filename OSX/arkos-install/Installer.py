@@ -85,6 +85,10 @@ class Assistant(QtGui.QWidget):
 		btn2.setIcon(QtGui.QIcon(os.path.join(os.path.dirname(__file__), 'images/search.png')))
 		btn2.clicked.connect(self.finder)
 
+		nmap = os.path.exists('/usr/local/bin/nmap')
+		if nmap == False:
+			btn2.setDisabled(True)
+
 		vbox = QtGui.QVBoxLayout()
 		banner = QtGui.QLabel()
 		banner.setPixmap(QtGui.QPixmap(os.path.join(os.path.dirname(__file__), 'images/header.png')))
@@ -96,6 +100,7 @@ class Assistant(QtGui.QWidget):
 		self.setLayout(vbox)
 		self.check_priv()
 		self.show()
+		self.raise_()
 
 	def check_priv(self):
 		# Make sure the user has the privileges necessary to run
@@ -107,18 +112,12 @@ class Assistant(QtGui.QWidget):
 	def installer(self):
 		self.install = Installer()
 		self.install.show()
+		self.install.raise_()
 		self.close()
 
 	def finder(self):
-		nmap = subprocess.Popen(['which', 'nmap'], 
-			stdout=subprocess.PIPE).wait()
-		if nmap != 0:
-			error_handler(self, 'nmap was not found on this system. Please '
-				'reopen the arkOS Installer image and run the nmap installer.', 
-				close=False)
-		else:
-			self.find = Finder()
-			self.close()
+		self.find = Finder()
+		self.close()
 
 
 ###################################################
@@ -166,6 +165,7 @@ class AuthDialog(QtGui.QDialog):
 
 		self.setLayout(vbox)
 		self.show()
+		self.raise_()
 
 	def send_sig(self, r, ip, user, passwd):
 		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -239,6 +239,7 @@ class Finder(QtGui.QWidget):
 		self.setLayout(vbox)
 
 		self.show()
+		self.raise_()
 
 	def poll_nodes(self):
 		self.tree_view.clear()
@@ -288,7 +289,7 @@ class Finder(QtGui.QWidget):
 					addrrange = item
 
 		# Step 2: find all RPis on the network
-		scan = subprocess.check_output(['nmap', '-oX', '-', '-sn', addrrange])
+		scan = subprocess.check_output(['/usr/local/bin/nmap', '-oX', '-', '-sn', addrrange])
 		hosts = ET.fromstring(scan)
 		ips = []
 		rpis = hosts.findall('.//address[@vendor="Raspberry Pi Foundation"]/..')
@@ -865,7 +866,6 @@ class ImgWriter(QtCore.QThread):
 		dd = subprocess.Popen(ddcmd, stdin=unzip.stdout, 
 			stderr=subprocess.PIPE)
 		error = dd.communicate()[1]
-		print os.geteuid()
 		if "error" in error or "denied" in error:
 			self.queue.put(error)
 		else:

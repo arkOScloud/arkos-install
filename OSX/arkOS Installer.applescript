@@ -2,7 +2,7 @@
 ##
 ##  arkOS Installer for Mac OS X
 ##  Copyright (C) 2013 Jacob Cook
-##  jacob@ark-os.org
+##  jacob@citizenweb.is
 ##
 ##  Uses elements of Raspbmc Installer, (C) 2013 Sam Nazarko
 ##
@@ -21,8 +21,8 @@
 ##
 ########################################################################
 
-tell application "Finder" to get folder of (path to me) as Unicode text
+tell application "Finder" to get (path to me) as Unicode text
 set workingDir to POSIX path of result
-set py to "Installer.py "
+set py to "/Contents/MacOS/arkos-install >/dev/null 2>&1 &"
 set calldir to quoted form of workingDir & py
 do shell script calldir with administrator privileges
