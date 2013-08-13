@@ -628,6 +628,7 @@ class ActionPage(QtGui.QWizardPage):
 		self.imglabel.setText('Copying image to ' + self.parent.device 
 			+ '... <b>DONE</b>')
 		self.parent.setPage(self.parent.PageConclusion, ConclusionPage(self.parent))
+		self.parent.setOption(QtGui.QWizard.NoBackButtonOnLastPage, True)
 		self.parent.next()
 
 	def updatebar(self, val, got, total):
@@ -717,14 +718,23 @@ class ConclusionPage(QtGui.QWizardPage):
 			'Username: <b>admin</b><br>'
 			'Password: <b>admin</b>')
 		label.setWordWrap(True)
+		self.box = QtGui.QCheckBox('Remove the downloaded files from your '
+			'computer on exit')
 
 		vbox = QtGui.QVBoxLayout()
 		vbox.addWidget(label)
+		vbox.addWidget(self.box)
 
 		self.setLayout(vbox)
 
 	def initializePage(self):
 		self.parent.cancelbtn.close()
+
+	def validatePage(self):
+		if self.box.isChecked():
+			os.unlink('latest.tar.gz')
+			os.unlink('latest.tar.gz.md5.txt')
+		return True
 
 
 ###################################################
@@ -760,7 +770,6 @@ class Installer(QtGui.QWizard):
 		self.cancelbtn.clicked.connect(self.quit_now)
 		self.setButton(self.CustomButton1, self.cancelbtn)
 
-		self.setOption(QtGui.QWizard.NoBackButtonOnLastPage, True)
 		self.setOption(QtGui.QWizard.NoCancelButton, True)
 		self.setOption(QtGui.QWizard.HaveCustomButton1, True)
 

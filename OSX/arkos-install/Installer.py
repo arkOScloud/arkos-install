@@ -146,6 +146,8 @@ class AuthDialog(QtGui.QDialog):
 		table.addWidget(plabel, 1, 0)
 		table.addWidget(uline, 0, 1)
 		table.addWidget(pline, 1, 1)
+		table.setRowMinimumHeight(0, 12)
+		table.setRowMinimumHeight(1, 12)
 
 		hbox = QtGui.QHBoxLayout()
 		btn1 = QtGui.QPushButton('Cancel')
@@ -634,6 +636,7 @@ class ActionPage(QtGui.QWizardPage):
 		self.imglabel.setText('Copying image to ' + self.parent.device 
 			+ '... <b>DONE</b>')
 		self.parent.setPage(self.parent.PageConclusion, ConclusionPage(self.parent))
+		self.parent.setOption(QtGui.QWizard.NoBackButtonOnLastPage, True)
 		self.parent.next()
 
 	def updatebar(self, val, got, total):
@@ -642,11 +645,11 @@ class ActionPage(QtGui.QWizardPage):
 
 	def pkg_check(self):
 		# If package exists, check authenticity then skip download if necessary
-		if os.path.exists('latest.tar.gz'):
+		if os.path.exists('/Users/'+os.getlogin()+'/Downloads/latest.tar.gz'):
 			self.dllabel.setText('<b>Package found in working directory!</b> '
 				'Checking authenticity...')
 			QtGui.QApplication.processEvents()
-			if os.path.exists('latest.tar.gz.md5.txt'):
+			if os.path.exists('/Users/'+os.getlogin()+'/Downloads/latest.tar.gz.md5.txt'):
 				result = self.md5sum()
 				if result == 0:
 					# the md5s were different. continue with download as is
@@ -664,7 +667,7 @@ class ActionPage(QtGui.QWizardPage):
 				else:
 					mirror_link = 'https://uspx.arkos.io/'
 				dl_md5 = urllib2.urlopen(mirror_link + 'latest.tar.gz.md5.txt')
-				md5_File = open('latest.tar.gz.md5.txt', 'w')
+				md5_File = open('/Users/'+os.getlogin()+'/Downloads/latest.tar.gz.md5.txt', 'w')
 				md5_File.write(dl_md5.read())
 				md5_File.close()
 				result = self.md5sum()
@@ -682,7 +685,7 @@ class ActionPage(QtGui.QWizardPage):
 
 	def md5sum(self):
 		# Returns an md5 hash for the file parameter
-		f = file('latest.tar.gz', 'rb')
+		f = file('/Users/'+os.getlogin()+'/Downloads/latest.tar.gz', 'rb')
 		m = md5.new()
 		while True:
 			d = f.read(8096)
@@ -691,7 +694,7 @@ class ActionPage(QtGui.QWizardPage):
 			m.update(d)
 		f.close()
 		pack_md5 = m.hexdigest()
-		file_md5 = open('latest.tar.gz.md5.txt')
+		file_md5 = open('/Users/'+os.getlogin()+'/Downloads/latest.tar.gz.md5.txt')
 		compare_md5 = file_md5.read().decode("utf-8")
 		file_md5.close()
 		if not pack_md5 in compare_md5:
@@ -722,14 +725,23 @@ class ConclusionPage(QtGui.QWizardPage):
 			'Username: <b>admin</b><br>'
 			'Password: <b>admin</b>')
 		label.setWordWrap(True)
+		self.box = QtGui.QCheckBox('Remove the downloaded files from your '
+			'computer on exit')
 
 		vbox = QtGui.QVBoxLayout()
 		vbox.addWidget(label)
+		vbox.addWidget(self.box)
 
 		self.setLayout(vbox)
 
 	def initializePage(self):
 		self.parent.cancelbtn.close()
+
+	def validatePage(self):
+		if self.box.isChecked():
+			os.unlink('/Users/'+os.getlogin()+'/Downloads/latest.tar.gz')
+			os.unlink('/Users/'+os.getlogin()+'/Downloads/latest.tar.gz.md5.txt')
+		return True
 
 
 ###################################################
@@ -765,7 +777,6 @@ class Installer(QtGui.QWizard):
 		self.cancelbtn.clicked.connect(self.quit_now)
 		self.setButton(self.CustomButton1, self.cancelbtn)
 
-		self.setOption(QtGui.QWizard.NoBackButtonOnLastPage, True)
 		self.setOption(QtGui.QWizard.NoCancelButton, True)
 		self.setOption(QtGui.QWizard.HaveCustomButton1, True)
 
@@ -861,7 +872,7 @@ class ImgWriter(QtCore.QThread):
 			self.queue.put('The drive could not be unmounted. '
 				'Make sure it is not in use before continuing.')
 			return
-		unzip = subprocess.Popen(['tar', 'xzOf', 'latest.tar.gz'], 
+		unzip = subprocess.Popen(['tar', 'xzOf', '/Users/'+os.getlogin()+'/Downloads/latest.tar.gz'], 
 			stdout=subprocess.PIPE)
 		dd = subprocess.Popen(ddcmd, stdin=unzip.stdout, 
 			stderr=subprocess.PIPE)
