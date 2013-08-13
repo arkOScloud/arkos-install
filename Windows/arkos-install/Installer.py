@@ -156,6 +156,7 @@ class AuthDialog(QtGui.QDialog):
 	def send_sig(self, r, ip, user, passwd):
 		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		try:
+			s.settimeout(20.0)
 			s.connect((ip, 8765))
 			sslSocket = socket.ssl(s)
 			sslSocket.write(json.dumps({
@@ -163,6 +164,7 @@ class AuthDialog(QtGui.QDialog):
 				'user': str(user.text()),
 				'pass': str(passwd.text()),
 				}))
+			sent = True
 			rsp = json.loads(sslSocket.read())
 			if 'ok' in rsp['response']:
 				success_handler(self, 'Signal to %s sent successfully.' % r)
@@ -171,7 +173,12 @@ class AuthDialog(QtGui.QDialog):
 				error_handler(self, 'Authentification failed', close=False)
 			s.close()
 		except Exception, e:
-			error_handler(self, 'There was an error processing your request.\n\n' + str(e), close=False)
+			if sent == True:
+				success_handler(self, 'Signal to %s sent successfully, but I didn\'t get a response. '
+					'Your command may or may not have completed.' % r)
+				self.close()
+			else:
+				error_handler(self, 'There was an error processing your request.\n\n' + str(e), close=False)
 			s.close()
  
 
@@ -294,6 +301,7 @@ class Finder(QtGui.QWidget):
 		for ip in ips:
 			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			try:
+				s.settimeout(10.0)
 				s.connect((ip, 8765))
 				sslSocket = socket.ssl(s)
 				sslSocket.write(json.dumps({

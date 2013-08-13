@@ -127,7 +127,7 @@ class Assistant(QtGui.QWidget):
 class AuthDialog(QtGui.QDialog):
 	def __init__(self, parent, r, ip):
 		super(AuthDialog, self).__init__(parent)
-		self.setFixedSize(300, 150)
+		self.setFixedSize(300, 175)
 		width, height = centerOnScreen(self)
 		self.move(width, height)
 		self.setWindowTitle('Authenticate')
@@ -136,18 +136,12 @@ class AuthDialog(QtGui.QDialog):
 		vbox = QtGui.QVBoxLayout()
 		label = QtGui.QLabel("<b>Give the username/password of a qualified user on the device</b>")
 		label.setWordWrap(True)
-		table = QtGui.QGridLayout()
-		ulabel = QtGui.QLabel('Username')
+		form = QtGui.QFormLayout()
 		uline = QtGui.QLineEdit()
-		plabel = QtGui.QLabel('Password')
 		pline = QtGui.QLineEdit()
 		pline.setEchoMode(QtGui.QLineEdit.Password)
-		table.addWidget(ulabel, 0, 0)
-		table.addWidget(plabel, 1, 0)
-		table.addWidget(uline, 0, 1)
-		table.addWidget(pline, 1, 1)
-		table.setRowMinimumHeight(0, 12)
-		table.setRowMinimumHeight(1, 12)
+		ulbl = form.addRow('Username', uline)
+		plbl = form.addRow('Password', pline)
 
 		hbox = QtGui.QHBoxLayout()
 		btn1 = QtGui.QPushButton('Cancel')
@@ -161,7 +155,7 @@ class AuthDialog(QtGui.QDialog):
 		hbox.addWidget(btn2)
 
 		vbox.addWidget(label)
-		vbox.addLayout(table)
+		vbox.addLayout(form)
 		vbox.addStretch(1)
 		vbox.addLayout(hbox)
 
@@ -172,6 +166,7 @@ class AuthDialog(QtGui.QDialog):
 	def send_sig(self, r, ip, user, passwd):
 		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		try:
+			s.settimeout(20.0)
 			s.connect((ip, 8765))
 			sslSocket = socket.ssl(s)
 			sslSocket.write(json.dumps({
@@ -179,6 +174,7 @@ class AuthDialog(QtGui.QDialog):
 				'user': str(user.text()),
 				'pass': str(passwd.text()),
 				}))
+			sent = True
 			rsp = json.loads(sslSocket.read())
 			if 'ok' in rsp['response']:
 				success_handler(self, 'Signal to %s sent successfully.' % r)
@@ -187,7 +183,12 @@ class AuthDialog(QtGui.QDialog):
 				error_handler(self, 'Authentification failed', close=False)
 			s.close()
 		except Exception, e:
-			error_handler(self, 'There was an error processing your request.\n\n' + str(e), close=False)
+			if sent == True:
+				success_handler(self, 'Signal to %s sent successfully, but I didn\'t get a response. '
+					'Your command may or may not have completed.' % r)
+				self.close()
+			else:
+				error_handler(self, 'There was an error processing your request.\n\n' + str(e), close=False)
 			s.close()
  
 
@@ -302,6 +303,7 @@ class Finder(QtGui.QWidget):
 		for ip in ips:
 			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			try:
+				s.settimeout(10.0)
 				s.connect((ip, 8765))
 				sslSocket = socket.ssl(s)
 				sslSocket.write(json.dumps({
@@ -831,7 +833,7 @@ class Downloader(QtCore.QThread):
 		except urllib2.HTTPError, e:
 			self.queue.put(e.code)
 			return
-		io_file = open(self.filename, 'w')
+		io_file = open('/Users/'+os.getlogin()+'/Downloads/'+self.filename, 'w')
 		self.size_read(dl_file, io_file, 8192)
 		io_file.close()
 		self.queue.put(200)
