@@ -29,6 +29,7 @@ import netifaces
 import os
 import Queue
 import socket
+import ssl
 import subprocess
 import sys
 import time
@@ -156,9 +157,10 @@ class AuthDialog(QtGui.QDialog):
 	def send_sig(self, r, ip, user, passwd):
 		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		try:
-			s.settimeout(20.0)
-			s.connect((ip, 8765))
-			sslSocket = socket.ssl(s)
+			sslSocket = ssl.wrap_socket(s, 
+				ssl_version=ssl.PROTOCOL_TLSv1)
+			sslSocket.settimeout(10.0)
+			sslSocket.connect((ip, 8765))
 			sslSocket.write(json.dumps({
 				'request': r,
 				'user': str(user.text()),
@@ -171,7 +173,7 @@ class AuthDialog(QtGui.QDialog):
 				self.close()
 			else:
 				error_handler(self, 'Authentification failed', close=False)
-			s.close()
+			sslSocket.close()
 		except Exception, e:
 			if sent == True:
 				success_handler(self, 'Signal to %s sent successfully, but I didn\'t get a response. '
@@ -179,7 +181,7 @@ class AuthDialog(QtGui.QDialog):
 				self.close()
 			else:
 				error_handler(self, 'There was an error processing your request.\n\n' + str(e), close=False)
-			s.close()
+			sslSocket.close()
  
 
 class Finder(QtGui.QWidget):
@@ -301,9 +303,10 @@ class Finder(QtGui.QWidget):
 		for ip in ips:
 			s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			try:
-				s.settimeout(10.0)
-				s.connect((ip, 8765))
-				sslSocket = socket.ssl(s)
+				sslSocket = ssl.wrap_socket(s, 
+					ssl_version=ssl.PROTOCOL_TLSv1)
+				sslSocket.settimeout(10.0)
+				sslSocket.connect((ip, 8765))
 				sslSocket.write(json.dumps({
 					'request': 'status'
 					}))
@@ -314,14 +317,14 @@ class Finder(QtGui.QWidget):
 						ip, 
 						rsp['status']
 						])
-				s.close()
+				sslSocket.close()
 			except:
 				nodes.append([num + 1,
 					'Unknown (Raspberry Pi)',
 					ip,
 					'Unknown'
 					])
-				s.close()
+				sslSocket.close()
 
 		# Step 4: format the list of RPis and statuses into the GUI list
 		for node in nodes:
@@ -455,17 +458,16 @@ class ChooseDevicePage(QtGui.QWizardPage):
 		self.emit(QtCore.SIGNAL('completeChanged()'))
 		QtGui.QApplication.setOverrideCursor(QtGui.QCursor(QtCore.Qt.WaitCursor))
 		devices = []
+		ignore = []
 		num = 0
 		c = wmi.WMI()
 		for disk in c.Win32_DiskDrive():
-			for part in c.Win32_DiskPartition():
-				reject = False
-				for ldisk in c.Win32_LogicalDisk():
-					if disk.deviceid[-1:] == str(part.diskindex) and 'C:' in ldisk.deviceid:
-						reject = True
-				if reject == True:
-					break
-			else:
+			ignoredisk = False
+			for part in disk.associators('Win32_DiskDriveToDiskPartition'):
+				for ldisk in part.associators('Win32_LogicalDiskToPartition'):
+					if 'C:' in ldisk.deviceid:
+						ignoredisk = True
+			if ignoredisk == False:
 				size = ((float(disk.size) / 1024.0) / 1024.0)
 				if size <= 2048.0:
 					continue
@@ -475,7 +477,6 @@ class ChooseDevicePage(QtGui.QWizardPage):
 				else:
 					unit = 'MB'
 				size = str(round(size, 2))
-
 				num = num + 1
 				devices.append([num, disk.deviceid, disk.caption, size, unit])
 
