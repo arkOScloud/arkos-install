@@ -27,6 +27,7 @@ import json
 import md5
 import netifaces
 import os
+import pythoncom
 import Queue
 import socket
 import ssl
@@ -620,7 +621,16 @@ class ActionPage(QtGui.QWizardPage):
 		self.progressbar.setMinimum(0)
 		self.progressbar.setMaximum(0)
 
-		self.write = ImgWriter(self.parent.queue, self.parent.device)
+		c = wmi.WMI()
+		formatlist = []
+		for disk in c.Win32_DiskDrive():
+			if self.parent.device in disk.deviceid:
+				for part in disk.associators('Win32_DiskDriveToDiskPartition'):
+					for ldisk in part.associators('Win32_LogicalDiskToPartition'):
+						formatlist.append(ldisk.deviceid)
+
+		self.write = ImgWriter(self.parent.queue, formatlist, 
+			self.parent.device)
 		self.datalabel.setText('Data write in progress.')
 		self.write.start()
 
@@ -858,25 +868,34 @@ class Downloader(QtCore.QThread):
 
 class ImgWriter(QtCore.QThread):
 	# Writes the downloaded image to disk
-	def __init__(self, queue, device):
+	def __init__(self, queue, formatlist, device):
 		super(ImgWriter, self).__init__()
+		self.formatlist = formatlist
 		self.device = device
+		self.devnum = device[-1:]
 		self.queue = queue
 
 	def run(self):
 		# Write the image and refresh partition
+		for dev in self.formatlist:
+			subprocess.Popen(['mountvol', dev, '/P']).wait()
+
 		uzcmd = os.path.join(os.path.dirname(__file__), 'deps', 'gzip.exe')\
 			+' -cd latest.tar.gz | '\
 			+os.path.join(os.path.dirname(__file__), 'deps', 'tar.exe')\
 			+' xO'
 		unzip = subprocess.Popen(uzcmd, shell=True, stdout=subprocess.PIPE)
 		ddcmd = [str(os.path.join(os.path.dirname(__file__), 'deps', 'dd.exe')),
-			'bs=1M', str('of=' + self.device)]
+			'bs=1M', 'of=\\\\?\\Device\\Harddisk%s\\Partition0' % self.devnum]
 		dd = subprocess.Popen(ddcmd, stdin=unzip.stdout, 
 			stderr=subprocess.PIPE)
 		error = dd.communicate()[1]
 		if "error" in error:
 			self.queue.put(error)
+		elif "Access is denied" in error:
+			self.queue.put('Access was denied to the drive. '
+				'Make sure the drive is unmounted and deactivated, then '
+				'restart the Installer.')
 		else:
 			self.queue.put(False)
 
