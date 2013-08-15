@@ -1,6 +1,7 @@
 *.py[cod]
 
 *.deb
+*.zip
 MANIFEST
 
 # C extensions

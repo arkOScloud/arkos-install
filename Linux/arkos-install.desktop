@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=0.3
+Name=arkOS Installer
+Comment=Installs the latest arkOS image to an SD card
+Exec=arkos-install
+Icon=arkos-install
+Terminal=false
+Type=Application
+Categories=Utility;Application;
