@@ -27,6 +27,7 @@ import json
 import md5
 import netifaces
 import os
+import re
 import Queue
 import socket
 import ssl
@@ -470,7 +471,7 @@ class ChooseDevicePage(QtGui.QWizardPage):
 				continue
 				
 			dev = lines.split()[1].rstrip(":")
-			size = lines.split()[2]
+			size = re.sub("[^0-9]", "", lines.split()[2])
 			unit = lines.split()[3].rstrip(",")
 
 			if unit == 'GB' and float(size) <= 2.0:
