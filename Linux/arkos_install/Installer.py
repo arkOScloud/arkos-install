@@ -469,10 +469,11 @@ class ChooseDevicePage(QtGui.QWizardPage):
 		for lines in fdisk:
 			if lines.startswith("/dev/") or lines.find("/dev/") == -1:
 				continue
-				
+
 			dev = lines.split()[1].rstrip(":")
-			size = re.sub("[^0-9]", "", lines.split()[2])
-			unit = lines.split()[3].rstrip(",")
+			r = re.compile("^\\s+([-,0-9. ]+)\\s+((?:[a-z][a-z]+))", re.IGNORECASE)
+			m = r.match(lines.split(":")[1])
+			size, unit = m.group(1), m.group(2)
 
 			if unit == 'GB' and float(size) <= 2.0:
 				continue
