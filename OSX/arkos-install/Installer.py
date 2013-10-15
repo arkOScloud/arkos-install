@@ -23,7 +23,9 @@
 ##
 ########################################################################
 
+import gettext
 import json
+import locale
 import md5
 import netifaces
 import os
@@ -38,6 +40,20 @@ import xml.etree.ElementTree as ET
 
 from PyQt4 import QtCore, QtGui
 
+###################################################
+##  Internationalization
+################################################### 
+
+def init_internationalization():
+	locale.setlocale(locale.LC_ALL, '')
+	loc = locale.getlocale()
+	filename = os.path.join(os.path.dirname(__file__), "translations/%s.mo" % locale.getlocale()[0][0:2])
+	try:
+		translation = gettext.GNUTranslations(open(filename, "rb"))
+  	except IOError:
+		translation = gettext.NullTranslations()
+
+  	translation.install(True)
 
 ###################################################
 ##  Random Functions
@@ -45,14 +61,14 @@ from PyQt4 import QtCore, QtGui
 
 def error_handler(self, msg, close=True):
 	# Throw up an error with the appropriate message and quit the application
-	message = QtGui.QMessageBox.critical(self, 'Error', msg, 
+	message = QtGui.QMessageBox.critical(self, _('Error'), msg, 
 		QtGui.QMessageBox.Ok, QtGui.QMessageBox.Ok)
 	if close is True:
 		os._exit(os.EX_CONFIG)
 
 def success_handler(self, msg, close=False):
 	# Throw up a success message
-	message = QtGui.QMessageBox.information(self, 'Success', msg, 
+	message = QtGui.QMessageBox.information(self, _('Success'), msg, 
 		QtGui.QMessageBox.Ok, QtGui.QMessageBox.Ok)
 	if close is True:
 		os._exit(os.EX_CONFIG)
@@ -76,13 +92,13 @@ class Assistant(QtGui.QWidget):
 		self.setFixedSize(375, 200)
 		width, height = centerOnScreen(self)
 		self.move(width, height)
-		self.setWindowTitle('arkOS Installer')
+		self.setWindowTitle(_('arkOS Installer'))
 		self.setWindowIcon(QtGui.QIcon(os.path.join(os.path.dirname(__file__), 'images/icon.png')))
 
-		btn1 = QtGui.QPushButton('Install arkOS to an SD card')
+		btn1 = QtGui.QPushButton(_('Install arkOS to an SD card'))
 		btn1.setIcon(QtGui.QIcon(os.path.join(os.path.dirname(__file__), 'images/install.png')))
 		btn1.clicked.connect(self.installer)
-		btn2 = QtGui.QPushButton('Search the network for arkOS devices')
+		btn2 = QtGui.QPushButton(_('Search the network for arkOS devices'))
 		btn2.setIcon(QtGui.QIcon(os.path.join(os.path.dirname(__file__), 'images/search.png')))
 		btn2.clicked.connect(self.finder)
 
@@ -106,9 +122,9 @@ class Assistant(QtGui.QWidget):
 	def check_priv(self):
 		# Make sure the user has the privileges necessary to run
 		if os.geteuid() != 0:
-			error_handler(self, 'You do not have sufficient privileges '
-				'to run this program. Please run the arkOS Installer app '
-				'from your Applications folder.')
+			error_handler(self, _('You do not have sufficient privileges '
+							'to run this program. Please run the arkOS Installer app '
+							'from your Applications folder.'))
 
 	def installer(self):
 		self.install = Installer()
@@ -131,24 +147,24 @@ class AuthDialog(QtGui.QDialog):
 		self.setFixedSize(300, 175)
 		width, height = centerOnScreen(self)
 		self.move(width, height)
-		self.setWindowTitle('Authenticate')
+		self.setWindowTitle(_('Authenticate'))
 		self.setWindowIcon(QtGui.QIcon(os.path.join(os.path.dirname(__file__), 'images/icon.png')))
 
 		vbox = QtGui.QVBoxLayout()
-		label = QtGui.QLabel("<b>Give the username/password of a qualified user on the device</b>")
+		label = QtGui.QLabel(_("<b>Give the username/password of a qualified user on the device</b>"))
 		label.setWordWrap(True)
 		form = QtGui.QFormLayout()
 		uline = QtGui.QLineEdit()
 		pline = QtGui.QLineEdit()
 		pline.setEchoMode(QtGui.QLineEdit.Password)
-		ulbl = form.addRow('Username', uline)
-		plbl = form.addRow('Password', pline)
+		ulbl = form.addRow(_('Username'), uline)
+		plbl = form.addRow(_('Password'), pline)
 
 		hbox = QtGui.QHBoxLayout()
-		btn1 = QtGui.QPushButton('Cancel')
+		btn1 = QtGui.QPushButton(_('Cancel'))
 		btn1.clicked.connect(self.close)
 		btn1.setIcon(QtGui.QIcon(os.path.join(os.path.dirname(__file__), 'images/cancel.png')))
-		btn2 = QtGui.QPushButton('OK')
+		btn2 = QtGui.QPushButton(_('OK'))
 		btn2.clicked.connect(lambda: self.send_sig(r, ip, uline, pline))
 		btn2.setIcon(QtGui.QIcon(os.path.join(os.path.dirname(__file__), 'images/ok.png')))
 		btn2.setDefault(True)
@@ -180,18 +196,18 @@ class AuthDialog(QtGui.QDialog):
 			sent = True
 			rsp = json.loads(sslSocket.read())
 			if 'ok' in rsp['response']:
-				success_handler(self, 'Signal to %s sent successfully.' % r)
+				success_handler(self, _('Signal to %s sent successfully.') % r)
 				self.close()
 			else:
-				error_handler(self, 'Authentification failed', close=False)
+				error_handler(self, _('Authentification failed'), close=False)
 			sslSocket.close()
 		except Exception, e:
 			if sent == True:
-				success_handler(self, 'Signal to %s sent successfully, but I didn\'t get a response. '
-					'Your command may or may not have completed.' % r)
+				success_handler(self, _('Signal to %s sent successfully, but I didn\'t get a response. '
+									'Your command may or may not have completed.') % r)
 				self.close()
 			else:
-				error_handler(self, 'There was an error processing your request.\n\n' + str(e), close=False)
+				error_handler(self, _('There was an error processing your request.\n\n%s') % str(e), close=False)
 			sslSocket.close()
  
 
@@ -203,7 +219,7 @@ class Finder(QtGui.QWidget):
 		self.setFixedSize(640, 400)
 		width, height = centerOnScreen(self)
 		self.move(width, height)
-		self.setWindowTitle('arkOS Network Finder')
+		self.setWindowTitle(_('arkOS Network Finder'))
 		self.setWindowIcon(QtGui.QIcon(os.path.join(os.path.dirname(__file__), 'images/icon.png')))
 		
 		self.nodetype = None
@@ -211,7 +227,7 @@ class Finder(QtGui.QWidget):
 
 		vbox = QtGui.QVBoxLayout()
 		self.tree_view = QtGui.QTreeWidget()
-		self.tree_view.setHeaderLabels(['#', 'Name', 'IP Address', 'Genesis Status'])
+		self.tree_view.setHeaderLabels(['#', _('Name'), _('IP Address'), _('Genesis Status')])
 		self.tree_view.setColumnWidth(0, 50)
 		self.tree_view.setColumnWidth(1, 250)
 		self.tree_view.setColumnWidth(2, 150)
@@ -220,22 +236,22 @@ class Finder(QtGui.QWidget):
 		self.tree_view.header().setMovable(False)
 
 		hbox = QtGui.QHBoxLayout()
-		btn1 = QtGui.QPushButton('Scan')
+		btn1 = QtGui.QPushButton(_('Scan'))
 		btn1.setIcon(QtGui.QIcon(os.path.join(os.path.dirname(__file__), 'images/search.png')))
 		btn1.clicked.connect(self.poll_nodes)
 		hbox.addWidget(btn1)
 
-		btn2 = QtGui.QPushButton('Shutdown')
+		btn2 = QtGui.QPushButton(_('Shutdown'))
 		btn2.setIcon(QtGui.QIcon(os.path.join(os.path.dirname(__file__), 'images/shutdown.png')))
 		btn2.clicked.connect(lambda: self.sig_node('shutdown'))
 		hbox.addWidget(btn2)
 
-		btn3 = QtGui.QPushButton('Restart')
+		btn3 = QtGui.QPushButton(_('Restart'))
 		btn3.setIcon(QtGui.QIcon(os.path.join(os.path.dirname(__file__), 'images/restart.png')))
 		btn3.clicked.connect(lambda: self.sig_node('restart'))
 		hbox.addWidget(btn3)
 
-		btn4 = QtGui.QPushButton('Reload Genesis')
+		btn4 = QtGui.QPushButton(_('Reload Genesis'))
 		btn4.setIcon(QtGui.QIcon(os.path.join(os.path.dirname(__file__), 'images/reload.png')))
 		btn4.clicked.connect(lambda: self.sig_node('reload'))
 		hbox.addWidget(btn4)
@@ -286,7 +302,7 @@ class Finder(QtGui.QWidget):
 				ranges.remove(item)
 
 		if len(ranges) == 0:
-			error_handler(self, 'I couldn\'t find any networks. Please make sure you are connected to a network.', close=False)
+			error_handler(self, _('I couldn\'t find any networks. Please make sure you are connected to a network.'), close=False)
 		elif len(ranges) == 1:
 			addrrange = ''.join(ranges)
 		else:
@@ -323,9 +339,9 @@ class Finder(QtGui.QWidget):
 				sslSocket.close()
 			except:
 				nodes.append([num + 1,
-					'Unknown (Raspberry Pi)',
+					_('Unknown (Raspberry Pi)'),
 					ip,
-					'Unknown'
+					_('Unknown')
 					])
 				sslSocket.close()
 
@@ -340,11 +356,11 @@ class Finder(QtGui.QWidget):
 		try:
 			node = self.tree_view.currentItem().text(2)
 		except AttributeError:
-			error_handler(self, 'Please make a selection', close=False)
+			error_handler(self, _('Please make a selection'), close=False)
 			return
 
 		if self.tree_view.currentItem().text(1).startsWith('Unknown'):
-			error_handler(self, 'This feature can only be used on arkOS systems that have Beacon enabled', close=False)
+			error_handler(self, _('This feature can only be used on arkOS systems that have Beacon enabled'), close=False)
 			return
 
 		authdlg = AuthDialog(self, r, node)
@@ -359,14 +375,14 @@ class IntroPage(QtGui.QWizardPage):
 		super(IntroPage, self).__init__(parent)
 		
 		# Introduction page
-		self.setTitle('Introduction')
-		label = QtGui.QLabel('Welcome to the arkOS Installer! This '
-			'program will guide you through installing the arkOS image '
-			'to an SD card inserted into your computer.\n\n'
-			'Once you click Forward, your computer will start downloading '
-			'the arkOS image from our servers in preparation for the '
-			'install. Please make sure your computer is connected to the '
-			'Internet before continuing.')
+		self.setTitle(_('Introduction'))
+		label = QtGui.QLabel(_('Welcome to the arkOS Installer! This '
+					'program will guide you through installing the arkOS image '
+					'to an SD card inserted into your computer.\n\n'
+					'Once you click Forward, your computer will start downloading '
+					'the arkOS image from our servers in preparation for the '
+					'install. Please make sure your computer is connected to the '
+					'Internet before continuing.'))
 		label.setWordWrap(True)
 
 		vbox = QtGui.QVBoxLayout()
@@ -384,13 +400,12 @@ class ChooseMirrorPage(QtGui.QWizardPage):
 		self.parent = parent
 
 		# Choose between the available mirrors
-		self.setTitle('Choose Mirror')
-		label = QtGui.QLabel('Choose the download mirror closest to your '
-			'location.')
+		self.setTitle(_('Choose Mirror'))
+		label = QtGui.QLabel(_('Choose the download mirror closest to your location.'))
 		label.setWordWrap(True)
 
-		self.nybtn = QtGui.QRadioButton('New York (United States)')
-		self.eubtn = QtGui.QRadioButton('Amsterdam (Europe)')
+		self.nybtn = QtGui.QRadioButton(_('New York (United States)'))
+		self.eubtn = QtGui.QRadioButton(_('Amsterdam (Europe)'))
 		self.eubtn.toggled.connect(self.set_selection)
 		self.nybtn.setChecked(True)
 
@@ -417,15 +432,15 @@ class ChooseDevicePage(QtGui.QWizardPage):
 		self.parent = parent
 
 		# Select a device to write to
-		self.setTitle('Choose Device')
-		label = QtGui.QLabel('Choose the appropriate device from the '
-			'list below. Devices smaller than the minimum (2 GB) are not shown. '
-			'Note that it is very important to choose the correct device! '
-			'If you choose another one you may seriously damage your system.')
+		self.setTitle(_('Choose Device'))
+		label = QtGui.QLabel(_('Choose the appropriate device from the '
+					'list below. Devices smaller than the minimum (2 GB) are not shown. '
+					'Note that it is very important to choose the correct device! '
+					'If you choose another one you may seriously damage your system.'))
 		label.setWordWrap(True)
 
 		self.tree_view = QtGui.QTreeWidget()
-		self.tree_view.setHeaderLabels(['#', 'Device', 'Size', 'Unit'])
+		self.tree_view.setHeaderLabels(['#', _('Device'), _('Size'), _('Unit')])
 		self.tree_view.setColumnWidth(0, 50)
 		self.tree_view.setColumnWidth(1, 175)
 		self.tree_view.setColumnWidth(3, 50)
@@ -434,7 +449,7 @@ class ChooseDevicePage(QtGui.QWizardPage):
 		self.tree_view.header().setMovable(False)
 		self.tree_view.itemSelectionChanged.connect(self.set_selection)
 
-		btn1 = QtGui.QPushButton('Scan')
+		btn1 = QtGui.QPushButton(_('Scan'))
 		btn1.setIcon(QtGui.QIcon(os.path.join(os.path.dirname(__file__), 'images/search.png')))
 		btn1.clicked.connect(self.poll_devices)
 
@@ -511,17 +526,17 @@ class ActionPage(QtGui.QWizardPage):
 
 		# Confirm the mirror and device choices before dl/write
 		# Then carry out the installation
-		self.setTitle('Confirm Details')
-		self.label = QtGui.QLabel('Please confirm the details below. Once you '
-			'click Start, the download will begin, then the selected '
-			'device will be erased and data will be overwritten.<br><br>'
-			'<b>NOTE that there is no way to halt the writing process '
-			'once it begins.</b><br>')
+		self.setTitle(_('Confirm Details'))
+		self.label = QtGui.QLabel(_('Please confirm the details below. Once you '
+					'click Start, the download will begin, then the selected '
+					'device will be erased and data will be overwritten.<br><br>'
+					'<b>NOTE that there is no way to halt the writing process '
+					'once it begins.</b><br>'))
 		self.label.setWordWrap(True)
 		self.mirlabel = QtGui.QLabel()
 		self.devlabel = QtGui.QLabel()
 
-		self.btn = QtGui.QPushButton('Start Download/Install')
+		self.btn = QtGui.QPushButton(_('Start Download/Install'))
 		self.btn.setIcon(QtGui.QIcon(os.path.join(os.path.dirname(__file__), 'images/install.png')))
 		self.btn.clicked.connect(self.install)
 
@@ -536,25 +551,24 @@ class ActionPage(QtGui.QWizardPage):
 
 	def initializePage(self):
 		if self.parent.mirror == 'eu':
-			self.mirlabel.setText('<b>Mirror:</b> Amsterdam (European Union)')
+			self.mirlabel.setText(_('<b>Mirror:</b> Amsterdam (European Union)'))
 		else:
-			self.mirlabel.setText('<b>Mirror:</b> New York (United States)')
-		self.devlabel.setText('<b>Device:</b> %s' % self.parent.device)
+			self.mirlabel.setText(_('<b>Mirror:</b> New York (United States)'))
+		self.devlabel.setText(_('<b>Device:</b> %s') % self.parent.device)
 
 	def install(self):
 		# Prepare the installation
-		self.setTitle('Installing arkOS')
+		self.setTitle(_('Installing arkOS'))
 		if self.parent.mirror == 'eu':
-			mirror_name = 'Amsterdam (European Union)'
+			mirror_name = _('Amsterdam (European Union)')
 		else:
-			mirror_name = 'New York (United States)'
+			mirror_name = _('New York (United States)')
 
 		self.label.close()
 		self.mirlabel.close()
 		self.devlabel.close()
 		self.btn.close()
-		self.dllabel = QtGui.QLabel("<b>Downloading image from " 
-			+ mirror_name + "...</b>")
+		self.dllabel = QtGui.QLabel(_("<b>Downloading image from %s...</b>") % mirror_name)
 		self.dllabel.setWordWrap(True)
 		self.imglabel = QtGui.QLabel()
 		self.pblabel = QtGui.QLabel()
@@ -581,11 +595,10 @@ class ActionPage(QtGui.QWizardPage):
 
 			download_result = self.parent.queue.get()
 			if download_result != 200:
-				error_handler(self, 'The file could not be downloaded. '
-					'Please check your Internet connection. If the '
-					'problem persists and your connection is fine, please '
-					'contact the arkOS maintainers.\n\nHTTP Error ' 
-					+ str(download_result))
+				error_handler(self, _('The file could not be downloaded. '
+									'Please check your Internet connection. If the '
+									'problem persists and your connection is fine, please '
+									'contact the arkOS maintainers.\n\nHTTP Error %s') % str(download_result))
 				return
 
 			self.progressbar.reset()
@@ -602,33 +615,31 @@ class ActionPage(QtGui.QWizardPage):
 
 			download_result = self.parent.queue.get()
 			if download_result != 200:
-				error_handler(self, 'The file could not be downloaded. '
-					'Please check your Internet connection. If the '
-					'problem persists and your connection is fine, please '
-					'contact the arkOS maintainers.\n\nHTTP Error ' 
-					+ str(download_result))
+				error_handler(self, _('The file could not be downloaded. '
+									'Please check your Internet connection. If the '
+									'problem persists and your connection is fine, please '
+									'contact the arkOS maintainers.\n\nHTTP Error %s') % str(download_result))
 				return
 
-			self.dllabel.setText("Downloading image from " + mirror_name + 
-				"... <b>DONE</b>")
+			self.dllabel.setText(_("Downloading image from %s... <b>DONE</b>") % mirror_name)
 
 			md5error = self.md5sum()
 			if md5error == 0:
-				error_handler(self, 'Installation failed: MD5 hashes are '
-					'not the same. Restart the installer and it will '
-					'redownload the package. If this error persists, please '
-					'contact the arkOS maintainers.')
+				error_handler(self, _('Installation failed: MD5 hashes are '
+									'not the same. Restart the installer and it will '
+									'redownload the package. If this error persists, please '
+									'contact the arkOS maintainers.'))
 				return
 
-		self.imglabel.setText("<b>Copying image to " + self.parent.device 
-			+ "...</b><br>(This will take a few minutes depending on "
-			"SD card size.)")
+		self.imglabel.setText(_("<b>Copying image to %s...</b><br>"
+					"(This will take a few minutes depending on "
+					"SD card size.)") % self.parent.device)
 		self.progressbar.reset()
 		self.progressbar.setMinimum(0)
 		self.progressbar.setMaximum(0)
 
 		self.write = ImgWriter(self.parent.queue, self.parent.device)
-		self.datalabel.setText('Data write in progress.')
+		self.datalabel.setText(_('Data write in progress.'))
 		self.write.start()
 
 		while self.write.isRunning():
@@ -636,36 +647,35 @@ class ActionPage(QtGui.QWizardPage):
 
 		write_result = self.parent.queue.get()
 		if write_result != False:
-			error_handler(self, 'The disk writing process failed with the '
-				'following error:\n\n' + write_result)
+			error_handler(self, _('The disk writing process failed with the '
+							'following error:\n\n%s') % write_result)
 			return
-		self.imglabel.setText('Copying image to ' + self.parent.device 
-			+ '... <b>DONE</b>')
+		self.imglabel.setText(_('Copying image to %s... <b>DONE</b>') % self.parent.device)
 		self.parent.setPage(self.parent.PageConclusion, ConclusionPage(self.parent))
 		self.parent.setOption(QtGui.QWizard.NoBackButtonOnLastPage, True)
 		self.parent.next()
 
 	def updatebar(self, val, got, total):
 		self.progressbar.setValue(val)
-		self.datalabel.setText("%0.1f of %0.1f MB - %d%%" % (got, total, val))
+		self.datalabel.setText(_("%0.1f of %0.1f MB - %d%%") % (got, total, val))
 
 	def pkg_check(self):
 		# If package exists, check authenticity then skip download if necessary
 		if os.path.exists('/Users/'+os.getlogin()+'/Downloads/latest.tar.gz'):
-			self.dllabel.setText('<b>Package found in working directory!</b> '
-				'Checking authenticity...')
+			self.dllabel.setText(_('<b>Package found in working directory!</b> '
+							'Checking authenticity...'))
 			QtGui.QApplication.processEvents()
 			if os.path.exists('/Users/'+os.getlogin()+'/Downloads/latest.tar.gz.md5.txt'):
 				result = self.md5sum()
 				if result == 0:
 					# the md5s were different. continue with download as is
-					self.dllabel.setText('Package found in working '
-						'directory, but MD5 check failed. Redownloading...')
+					self.dllabel.setText(_('Package found in working '
+											'directory, but MD5 check failed. Redownloading...'))
 					return 0
 				else:
 					# the md5s were the same! skip the download.
-					self.dllabel.setText('Authentic package found in '
-						'working directory. Skipping download...')
+					self.dllabel.setText(_('Authentic package found in '
+											'working directory. Skipping download...'))
 					return 1
 			else:
 				if self.parent.mirror == 'eu':
@@ -679,13 +689,13 @@ class ActionPage(QtGui.QWizardPage):
 				result = self.md5sum()
 				if result == 0:
 					# the md5s were different. gotta redownload the package
-					self.dllabel.setText('Package found in working '
-						'directory, but MD5 check failed. Redownloading...')
+					self.dllabel.setText(_('Package found in working '
+											'directory, but MD5 check failed. Redownloading...'))
 					return 0
 				else:
 					# the md5s were the same! skip the download.
-					self.dllabel.setText('Authentic package found in '
-						'working directory. Skipping download...')
+					self.dllabel.setText(_('Authentic package found in '
+											'working directory. Skipping download...'))
 					return 1
 		return 0
 
@@ -718,21 +728,21 @@ class ConclusionPage(QtGui.QWizardPage):
 		self.parent = parent
 
 		# Show success message and setup instructions
-		self.setTitle('Installation Complete')
-		label = QtGui.QLabel('Congratulations! Your image has been '
-			'written to the SD card successfully.<br><br>Insert the SD card '
-			'into your Raspberry Pi and connect it to your router.<br><br>'
-			'After a minute or two, set up your server by opening your browser '
-			'and connecting to Genesis at the following address:'
-			'<br><b>http://arkOS:8000</b>'
-			'<br>or use the Network Browser option in this Installer to '
-			'find the IP address.<br><br>'
-			'Your initial Genesis login credentials are:<br>'
-			'Username: <b>admin</b><br>'
-			'Password: <b>admin</b>')
+		self.setTitle(_('Installation Complete'))
+		label = QtGui.QLabel(_('Congratulations! Your image has been '
+					'written to the SD card successfully.<br><br>Insert the SD card '
+					'into your Raspberry Pi and connect it to your router.<br><br>'
+					'After a minute or two, set up your server by opening your browser '
+					'and connecting to Genesis at the following address:'
+					'<br><b>http://arkOS:8000</b>'
+					'<br>or use the Network Browser option in this Installer to '
+					'find the IP address.<br><br>'
+					'Your initial Genesis login credentials are:<br>'
+					'Username: <b>admin</b><br>'
+					'Password: <b>admin</b>'))
 		label.setWordWrap(True)
-		self.box = QtGui.QCheckBox('Remove the downloaded files from your '
-			'computer on exit')
+		self.box = QtGui.QCheckBox(_('Remove the downloaded files from your '
+					'computer on exit'))
 
 		vbox = QtGui.QVBoxLayout()
 		vbox.addWidget(label)
@@ -771,7 +781,7 @@ class Installer(QtGui.QWizard):
 		self.setFixedSize(640, 400)
 		width, height = centerOnScreen(self)
 		self.move(width, height)
-		self.setWindowTitle('arkOS Installer')
+		self.setWindowTitle(_('arkOS Installer'))
 		self.setWindowIcon(QtGui.QIcon(os.path.join(os.path.dirname(__file__), 'images/icon.png')))
 
 		self.setPage(self.PageIntro, IntroPage(self))
@@ -779,7 +789,7 @@ class Installer(QtGui.QWizard):
 		self.setPage(self.PageChooseDevice, ChooseDevicePage(self))
 		self.setPage(self.PageAction, ActionPage(self))
 
-		self.cancelbtn = QtGui.QPushButton('Cancel')
+		self.cancelbtn = QtGui.QPushButton(_('Cancel'))
 		self.cancelbtn.clicked.connect(self.quit_now)
 		self.setButton(self.CustomButton1, self.cancelbtn)
 
@@ -790,11 +800,11 @@ class Installer(QtGui.QWizard):
 
 	def quit_now(self):
 		# Run this when the user cancels or exits at a sensitive time
-		msg = QtGui.QMessageBox.warning(self, 'Quit?', 
-			'Are you sure you want to quit? The installation is not '
+		msg = QtGui.QMessageBox.warning(self, _('Quit?'), 
+			_('Are you sure you want to quit? The installation is not '
 			'complete and you will not be able to use your SD card.\n\n'
 			'If a disk write operation is in progress, this will not be '
-			'able to stop that process.', QtGui.QMessageBox.Yes | 
+			'able to stop that process.'), QtGui.QMessageBox.Yes | 
 			QtGui.QMessageBox.No, QtGui.QMessageBox.No)
 
 		if msg == QtGui.QMessageBox.Yes:
@@ -875,8 +885,8 @@ class ImgWriter(QtCore.QThread):
 		try:
 			unmount = subprocess.Popen(umcmd).wait()
 		except subprocess.CalledProcessError:
-			self.queue.put('The drive could not be unmounted. '
-				'Make sure it is not in use before continuing.')
+			self.queue.put(_('The drive could not be unmounted. '
+							'Make sure it is not in use before continuing.'))
 			return
 		unzip = subprocess.Popen(['tar', 'xzOf', '/Users/'+os.getlogin()+'/Downloads/latest.tar.gz'], 
 			stdout=subprocess.PIPE)
@@ -890,6 +900,7 @@ class ImgWriter(QtCore.QThread):
 
 
 def main():
+	init_internationalization()
 	app = QtGui.QApplication(sys.argv)
 	asst = Assistant()
 	sys.exit(app.exec_())

@@ -3,7 +3,7 @@ from setuptools import setup
 APP = ['arkos-install/Installer.py']
 DATA_FILES = ['arkOS Installer.applescript']
 OPTIONS = {'argv_emulation': True, 'iconfile': 'icon.icns',
-	'resources': ['arkos-install/images'],  
+	'resources': ['arkos-install/images','arkos-install/translations'],  
 	'includes': ['netifaces', 'sip', 'PyQt4']}
 
 setup(
