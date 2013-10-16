@@ -875,7 +875,7 @@ class ImgWriter(QtCore.QThread):
 	# Writes the downloaded image to disk
 	def __init__(self, queue, device):
 		super(ImgWriter, self).__init__()
-		self.device = '/dev/' + device
+		self.device = '/dev/r' + device
 		self.queue = queue
 
 	def run(self):
