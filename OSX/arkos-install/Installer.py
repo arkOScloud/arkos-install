@@ -359,7 +359,7 @@ class Finder(QtGui.QWidget):
 			error_handler(self, _('Please make a selection'), close=False)
 			return
 
-		if self.tree_view.currentItem().text(1).startsWith('Unknown'):
+		if self.tree_view.currentItem().text(1).startsWith(_('Unknown')):
 			error_handler(self, _('This feature can only be used on arkOS systems that have Beacon enabled'), close=False)
 			return
 
