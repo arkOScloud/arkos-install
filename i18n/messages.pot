@@ -6,10 +6,10 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: arkOS Installer\n"
+"Project-Id-Version: 0.3\n"
 "Report-Msgid-Bugs-To: Jacob Cook <jacob@citizenweb.is>\n"
-"POT-Creation-Date: 2013-10-16 10:10-0400\n"
-"PO-Revision-Date: 2013-10-16 10:12-0400\n"
+"POT-Creation-Date: 2013-10-17 15:52-0400\n"
+"PO-Revision-Date: 2013-10-17 15:52-0400\n"
 "Last-Translator: Jacob Cook <jacob@citizenweb.is>\n"
 "Language-Team: ENGLISH <jacob@citizenweb.is>\n"
 "Language: English\n"
@@ -17,73 +17,73 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: Installer.py:64 Installer.py:65
+#: Installer.py:68 Installer.py:64
 msgid "Error"
 msgstr ""
 
-#: Installer.py:71 Installer.py:72
+#: Installer.py:75 Installer.py:71
 msgid "Success"
 msgstr ""
 
-#: Installer.py:95 Installer.py:784 Installer.py:96 Installer.py:787
+#: Installer.py:99 Installer.py:801 Installer.py:95 Installer.py:795
 msgid "arkOS Installer"
 msgstr ""
 
-#: Installer.py:98 Installer.py:99
+#: Installer.py:102 Installer.py:98
 msgid "Install arkOS to an SD card"
 msgstr ""
 
-#: Installer.py:101 Installer.py:102
+#: Installer.py:105 Installer.py:101
 msgid "Search the network for arkOS devices"
 msgstr ""
 
-#: Installer.py:125
+#: Installer.py:130
 msgid ""
-"You do not have sufficient privileges to run this program. Please run the "
-"arkOS Installer app from your Applications folder."
+"You do not have sufficient privileges to run this program. Please run sudo "
+"Installer.py instead."
 msgstr ""
 
-#: Installer.py:150
+#: Installer.py:153 Installer.py:150
 msgid "Authenticate"
 msgstr ""
 
-#: Installer.py:154
+#: Installer.py:157 Installer.py:154
 msgid "<b>Give the username/password of a qualified user on the device</b>"
 msgstr ""
 
-#: Installer.py:160 Installer.py:157
+#: Installer.py:160
 msgid "Username"
 msgstr ""
 
-#: Installer.py:161 Installer.py:159
+#: Installer.py:162 Installer.py:161
 msgid "Password"
 msgstr ""
 
-#: Installer.py:164 Installer.py:792 Installer.py:168 Installer.py:795
+#: Installer.py:171 Installer.py:809 Installer.py:164 Installer.py:803
 msgid "Cancel"
 msgstr ""
 
-#: Installer.py:167 Installer.py:171
+#: Installer.py:174 Installer.py:167
 msgid "OK"
 msgstr ""
 
-#: Installer.py:199 Installer.py:202
+#: Installer.py:205 Installer.py:199
 #, python-format
 msgid "Signal to %s sent successfully."
 msgstr ""
 
-#: Installer.py:202 Installer.py:205
+#: Installer.py:208 Installer.py:202
 msgid "Authentification failed"
 msgstr ""
 
-#: Installer.py:206 Installer.py:209
+#: Installer.py:212 Installer.py:206
 #, python-format
 msgid ""
 "Signal to %s sent successfully, but I didn't get a response. Your command "
 "may or may not have completed."
 msgstr ""
 
-#: Installer.py:210 Installer.py:213
+#: Installer.py:216 Installer.py:210
 #, python-format
 msgid ""
 "There was an error processing your request.\n"
@@ -91,65 +91,65 @@ msgid ""
 "%s"
 msgstr ""
 
-#: Installer.py:222 Installer.py:225
+#: Installer.py:228 Installer.py:222
 msgid "arkOS Network Finder"
 msgstr ""
 
-#: Installer.py:230 Installer.py:233
+#: Installer.py:236 Installer.py:230
 msgid "Name"
 msgstr ""
 
-#: Installer.py:230 Installer.py:233
+#: Installer.py:236 Installer.py:230
 msgid "IP Address"
 msgstr ""
 
-#: Installer.py:230 Installer.py:233
+#: Installer.py:236 Installer.py:230
 msgid "Genesis Status"
 msgstr ""
 
-#: Installer.py:239 Installer.py:452 Installer.py:242 Installer.py:455
+#: Installer.py:245 Installer.py:463 Installer.py:239 Installer.py:457
 msgid "Scan"
 msgstr ""
 
-#: Installer.py:244 Installer.py:247
+#: Installer.py:250 Installer.py:244
 msgid "Shutdown"
 msgstr ""
 
-#: Installer.py:249 Installer.py:252
+#: Installer.py:255 Installer.py:249
 msgid "Restart"
 msgstr ""
 
-#: Installer.py:254 Installer.py:257
+#: Installer.py:260 Installer.py:254
 msgid "Reload Genesis"
 msgstr ""
 
-#: Installer.py:305 Installer.py:307
+#: Installer.py:310 Installer.py:305
 msgid ""
 "I couldn't find any networks. Please make sure you are connected to a "
 "network."
 msgstr ""
 
-#: Installer.py:342 Installer.py:344
+#: Installer.py:347 Installer.py:342
 msgid "Unknown (Raspberry Pi)"
 msgstr ""
 
-#: Installer.py:344 Installer.py:362 Installer.py:346
+#: Installer.py:349 Installer.py:344 Installer.py:362
 msgid "Unknown"
 msgstr ""
 
-#: Installer.py:359 Installer.py:361
+#: Installer.py:364 Installer.py:359
 msgid "Please make a selection"
 msgstr ""
 
-#: Installer.py:363 Installer.py:365
+#: Installer.py:368 Installer.py:363
 msgid "This feature can only be used on arkOS systems that have Beacon enabled"
 msgstr ""
 
-#: Installer.py:378 Installer.py:380
+#: Installer.py:383 Installer.py:378
 msgid "Introduction"
 msgstr ""
 
-#: Installer.py:379 Installer.py:381
+#: Installer.py:384 Installer.py:379
 msgid ""
 "Welcome to the arkOS Installer! This program will guide you through "
 "installing the arkOS image to an SD card inserted into your computer.\n"
@@ -159,27 +159,31 @@ msgid ""
 "computer is connected to the Internet before continuing."
 msgstr ""
 
-#: Installer.py:403 Installer.py:405
+#: Installer.py:408 Installer.py:403
 msgid "Choose Mirror"
 msgstr ""
 
-#: Installer.py:404 Installer.py:406
+#: Installer.py:409 Installer.py:404
 msgid "Choose the download mirror closest to your location."
 msgstr ""
 
-#: Installer.py:407 Installer.py:565 Installer.py:410 Installer.py:566
+#: Installer.py:413 Installer.py:578 Installer.py:407 Installer.py:574
 msgid "New York (United States)"
 msgstr ""
 
-#: Installer.py:408 Installer.py:411
-msgid "Amsterdam (Europe)"
+#: Installer.py:414 Installer.py:574 Installer.py:408 Installer.py:570
+msgid "Amsterdam (Netherlands)"
 msgstr ""
 
-#: Installer.py:435 Installer.py:438
+#: Installer.py:415 Installer.py:576 Installer.py:409 Installer.py:572
+msgid "Frankfurt (Germany)"
+msgstr ""
+
+#: Installer.py:446 Installer.py:440
 msgid "Choose Device"
 msgstr ""
 
-#: Installer.py:436 Installer.py:439
+#: Installer.py:447 Installer.py:441
 msgid ""
 "Choose the appropriate device from the list below. Devices smaller than the "
 "minimum (2 GB) are not shown. Note that it is very important to choose the "
@@ -187,23 +191,23 @@ msgid ""
 "system."
 msgstr ""
 
-#: Installer.py:443 Installer.py:446
+#: Installer.py:454 Installer.py:448
 msgid "Device"
 msgstr ""
 
-#: Installer.py:443 Installer.py:446
+#: Installer.py:454 Installer.py:448
 msgid "Size"
 msgstr ""
 
-#: Installer.py:443 Installer.py:446
+#: Installer.py:454 Installer.py:448
 msgid "Unit"
 msgstr ""
 
-#: Installer.py:529 Installer.py:530
+#: Installer.py:538 Installer.py:534
 msgid "Confirm Details"
 msgstr ""
 
-#: Installer.py:530 Installer.py:531
+#: Installer.py:539 Installer.py:535
 msgid ""
 "Please confirm the details below. Once you click Start, the download will "
 "begin, then the selected device will be erased and data will be overwritten."
@@ -211,37 +215,37 @@ msgid ""
 "begins.</b><br>"
 msgstr ""
 
-#: Installer.py:539 Installer.py:540
+#: Installer.py:548 Installer.py:544
 msgid "Start Download/Install"
 msgstr ""
 
-#: Installer.py:554 Installer.py:555
-msgid "<b>Mirror:</b> Amsterdam (European Union)"
+#: Installer.py:563 Installer.py:559
+msgid "<b>Mirror:</b> Amsterdam (Netherlands)"
 msgstr ""
 
-#: Installer.py:556 Installer.py:557
+#: Installer.py:565 Installer.py:561
+msgid "<b>Mirror:</b> Frankfurt (Germany)"
+msgstr ""
+
+#: Installer.py:567 Installer.py:563
 msgid "<b>Mirror:</b> New York (United States)"
 msgstr ""
 
-#: Installer.py:557 Installer.py:558
+#: Installer.py:568 Installer.py:564
 #, python-format
 msgid "<b>Device:</b> %s"
 msgstr ""
 
-#: Installer.py:561 Installer.py:562
+#: Installer.py:572 Installer.py:568
 msgid "Installing arkOS"
 msgstr ""
 
-#: Installer.py:563 Installer.py:564
-msgid "Amsterdam (European Union)"
-msgstr ""
-
-#: Installer.py:571 Installer.py:572
+#: Installer.py:584 Installer.py:580
 #, python-format
 msgid "<b>Downloading image from %s...</b>"
 msgstr ""
 
-#: Installer.py:598 Installer.py:618 Installer.py:599 Installer.py:620
+#: Installer.py:611 Installer.py:632 Installer.py:607 Installer.py:627
 #, python-format
 msgid ""
 "The file could not be downloaded. Please check your Internet connection. If "
@@ -251,30 +255,30 @@ msgid ""
 "HTTP Error %s"
 msgstr ""
 
-#: Installer.py:624 Installer.py:626
+#: Installer.py:638 Installer.py:633
 #, python-format
 msgid "Downloading image from %s... <b>DONE</b>"
 msgstr ""
 
-#: Installer.py:628 Installer.py:630
+#: Installer.py:642 Installer.py:637
 msgid ""
 "Installation failed: MD5 hashes are not the same. Restart the installer and "
 "it will redownload the package. If this error persists, please contact the "
 "arkOS maintainers."
 msgstr ""
 
-#: Installer.py:634 Installer.py:636
+#: Installer.py:648 Installer.py:643
 #, python-format
 msgid ""
 "<b>Copying image to %s...</b><br>(This will take a few minutes depending on "
 "SD card size.)"
 msgstr ""
 
-#: Installer.py:642 Installer.py:644
+#: Installer.py:656 Installer.py:651
 msgid "Data write in progress."
 msgstr ""
 
-#: Installer.py:650 Installer.py:652
+#: Installer.py:664 Installer.py:659
 #, python-format
 msgid ""
 "The disk writing process failed with the following error:\n"
@@ -282,33 +286,33 @@ msgid ""
 "%s"
 msgstr ""
 
-#: Installer.py:653 Installer.py:655
+#: Installer.py:667 Installer.py:662
 #, python-format
 msgid "Copying image to %s... <b>DONE</b>"
 msgstr ""
 
-#: Installer.py:660 Installer.py:662
+#: Installer.py:674 Installer.py:669
 msgid "%0.1(got)f of %0.1(total)f MB - %(val)d%%"
 msgstr ""
 
-#: Installer.py:665 Installer.py:667
+#: Installer.py:679 Installer.py:674
 msgid "<b>Package found in working directory!</b> Checking authenticity..."
 msgstr ""
 
-#: Installer.py:672 Installer.py:692 Installer.py:675 Installer.py:695
+#: Installer.py:687 Installer.py:709 Installer.py:681 Installer.py:703
 msgid ""
 "Package found in working directory, but MD5 check failed. Redownloading..."
 msgstr ""
 
-#: Installer.py:677 Installer.py:697 Installer.py:680 Installer.py:700
+#: Installer.py:692 Installer.py:714 Installer.py:686 Installer.py:708
 msgid "Authentic package found in working directory. Skipping download..."
 msgstr ""
 
-#: Installer.py:731 Installer.py:734
+#: Installer.py:748 Installer.py:742
 msgid "Installation Complete"
 msgstr ""
 
-#: Installer.py:732 Installer.py:735
+#: Installer.py:749 Installer.py:743
 msgid ""
 "Congratulations! Your image has been written to the SD card successfully."
 "<br><br>Insert the SD card into your Raspberry Pi and connect it to your "
@@ -319,15 +323,15 @@ msgid ""
 "<br>Username: <b>admin</b><br>Password: <b>admin</b>"
 msgstr ""
 
-#: Installer.py:744 Installer.py:747
+#: Installer.py:761 Installer.py:755
 msgid "Remove the downloaded files from your computer on exit"
 msgstr ""
 
-#: Installer.py:803 Installer.py:806
+#: Installer.py:820 Installer.py:814
 msgid "Quit?"
 msgstr ""
 
-#: Installer.py:804 Installer.py:807
+#: Installer.py:821 Installer.py:815
 msgid ""
 "Are you sure you want to quit? The installation is not complete and you will "
 "not be able to use your SD card.\n"
@@ -336,14 +340,14 @@ msgid ""
 "process."
 msgstr ""
 
-#: Installer.py:888
+#: Installer.py:125
+msgid ""
+"You do not have sufficient privileges to run this program. Please run the "
+"arkOS Installer app from your Applications folder."
+msgstr ""
+
+#: Installer.py:901
 msgid ""
 "The drive could not be unmounted. Make sure it is not in use before "
 "continuing."
-msgstr ""
-
-#: Installer.py:127
-msgid ""
-"You do not have sufficient privileges to run this program. Please run sudo "
-"Installer.py instead."
 msgstr ""

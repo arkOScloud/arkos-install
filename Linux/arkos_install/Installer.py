@@ -48,11 +48,14 @@ from PyQt4 import QtCore, QtGui
 def init_internationalization():
 	locale.setlocale(locale.LC_ALL, '')
 	loc = locale.getlocale()
-	filename = os.path.join(os.path.dirname(__file__), "translations/%s.mo" % locale.getlocale()[0][0:2])
-	try:
-		translation = gettext.GNUTranslations(open(filename, "rb"))
-	except IOError:
+	if not loc[0]:
 		translation = gettext.NullTranslations()
+	else:
+		filename = os.path.join(os.path.dirname(__file__), "translations/%s.mo" % loc[0][0:2])
+		try:
+			translation = gettext.GNUTranslations(open(filename, "rb"))
+		except IOError:
+			translation = gettext.NullTranslations()
 
 	translation.install(True)
 
@@ -408,14 +411,17 @@ class ChooseMirrorPage(QtGui.QWizardPage):
 		label.setWordWrap(True)
 
 		self.nybtn = QtGui.QRadioButton(_('New York (United States)'))
-		self.eubtn = QtGui.QRadioButton(_('Amsterdam (Europe)'))
-		self.eubtn.toggled.connect(self.set_selection)
+		self.ambtn = QtGui.QRadioButton(_('Amsterdam (Netherlands)'))
+		self.frbtn = QtGui.QRadioButton(_('Frankfurt (Germany)'))
+		self.ambtn.toggled.connect(self.set_selection)
+		self.frbtn.toggled.connect(self.set_selection)
 		self.nybtn.setChecked(True)
 
 		vbox = QtGui.QVBoxLayout()
 		vbox.addWidget(label)
 		vbox.addWidget(self.nybtn)
-		vbox.addWidget(self.eubtn)
+		vbox.addWidget(self.ambtn)
+		vbox.addWidget(self.frbtn)
 
 		self.setLayout(vbox)
 
@@ -423,10 +429,12 @@ class ChooseMirrorPage(QtGui.QWizardPage):
 		return Installer.PageChooseDevice
 
 	def set_selection(self):
-		if self.nybtn.isChecked():
-			self.parent.mirror = 'ny'
+		if self.frbtn.isChecked():
+			self.parent.mirror = 'fr'
+		elif self.ambtn.isChecked:
+			self.parent.mirror = 'am'
 		else:
-			self.parent.mirror = 'eu'
+			self.parent.mirror = 'ny'
 
 
 class ChooseDevicePage(QtGui.QWizardPage):
@@ -551,8 +559,10 @@ class ActionPage(QtGui.QWizardPage):
 		self.setLayout(self.vbox)
 
 	def initializePage(self):
-		if self.parent.mirror == 'eu':
-			self.mirlabel.setText(_('<b>Mirror:</b> Amsterdam (European Union)'))
+		if self.parent.mirror == 'am':
+			self.mirlabel.setText(_('<b>Mirror:</b> Amsterdam (Netherlands)'))
+		elif self.parent.mirror == 'fr':
+			self.mirlabel.setText(_('<b>Mirror:</b> Frankfurt (Germany)'))
 		else:
 			self.mirlabel.setText(_('<b>Mirror:</b> New York (United States)'))
 		self.devlabel.setText(_('<b>Device:</b> %s') % self.parent.device)
@@ -560,8 +570,10 @@ class ActionPage(QtGui.QWizardPage):
 	def install(self):
 		# Prepare the installation
 		self.setTitle(_('Installing arkOS'))
-		if self.parent.mirror == 'eu':
-			mirror_name = _('Amsterdam (European Union)')
+		if self.parent.mirror == 'am':
+			mirror_name = _('Amsterdam (Netherlands)')
+		elif self.parent.mirror == 'fr':
+			mirror_name = _('Frankfurt (Germany)')
 		else:
 			mirror_name = _('New York (United States)')
 
@@ -681,10 +693,12 @@ class ActionPage(QtGui.QWizardPage):
 						'working directory. Skipping download...'))
 					return 1
 			else:
-				if self.parent.mirror == 'eu':
-					mirror_link = 'https://eupx.arkos.io/'
+				if self.parent.mirror == 'am':
+					mirror_link = 'https://amnl.arkos.io/'
+				elif self.parent.mirror == 'fr':
+					mirror_link = 'https://frde.arkos.io/'
 				else:
-					mirror_link = 'https://uspx.arkos.io/'
+					mirror_link = 'https://nyus.arkos.io/'
 				dl_md5 = urllib2.urlopen(mirror_link + 'latest.tar.gz.md5.txt')
 				md5_File = open('latest.tar.gz.md5.txt', 'w')
 				md5_File.write(dl_md5.read())
@@ -836,10 +850,12 @@ class Downloader(QtCore.QThread):
 	def __init__(self, queue, mirror, filename):
 		super(Downloader, self).__init__()
 		self.queue = queue
-		if mirror == 'eu':
-			self.mirror_link = 'https://eupx.arkos.io/'
+		if mirror == 'am':
+			self.mirror_link = 'https://amnl.arkos.io/'
+		elif mirror == 'fr':
+			self.mirror_link = 'https://frde.arkos.io/'
 		else:
-			self.mirror_link = 'https://uspx.arkos.io/'
+			self.mirror_link = 'https://nyus.arkos.io/'
 		self.filename = filename
 
 	def run(self):
