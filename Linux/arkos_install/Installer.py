@@ -136,7 +136,12 @@ class Assistant(QtGui.QWidget):
 		self.close()
 
 	def finder(self):
-		self.find = Finder()
+		try:
+			subprocess.check_call(['which', 'nmap'])
+			self.find = Finder()
+		except subprocess.CalledProcessError:
+			error_handler(self, _('You need nmap installed in order to use this. '
+				'Please install it from your distribution\'s software center or repositories.'), close=False)
 		self.close()
 
 

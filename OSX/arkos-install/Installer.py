@@ -102,10 +102,6 @@ class Assistant(QtGui.QWidget):
 		btn2.setIcon(QtGui.QIcon(os.path.join(os.path.dirname(__file__), 'images/search.png')))
 		btn2.clicked.connect(self.finder)
 
-		nmap = os.path.exists('/usr/local/bin/nmap')
-		if nmap == False:
-			btn2.setDisabled(True)
-
 		vbox = QtGui.QVBoxLayout()
 		banner = QtGui.QLabel()
 		banner.setPixmap(QtGui.QPixmap(os.path.join(os.path.dirname(__file__), 'images/header.png')))
@@ -133,7 +129,12 @@ class Assistant(QtGui.QWidget):
 		self.close()
 
 	def finder(self):
-		self.find = Finder()
+		nmap = os.path.exists('/usr/local/bin/nmap')
+		if nmap:
+			self.find = Finder()
+		else:
+			btn2.clicked.connect(error_handler(self, _('You need nmap installed in order to use this. '
+				'Please go to <a href="http://nmap.org/download.html#macosx">their website</a> to download.'), close=False))
 		self.close()
 
 
