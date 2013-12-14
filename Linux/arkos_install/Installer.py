@@ -506,11 +506,22 @@ class ChooseDevicePage(QtGui.QWizardPage):
 			stdout=subprocess.PIPE).stdout.readlines()
 		mounts = subprocess.Popen(['mount'], 
 			stdout=subprocess.PIPE).stdout.readlines()
+
+		uuids = {}
+		try:
+			for x in os.listdir('/dev/disk/by-uuid'):
+				uuids[os.path.realpath(os.path.join('/dev/disk/by-uuid', x))] = x 
+		except OSError:
+			pass
 		for lines in fdisk:
 			if lines.startswith("/dev/") or lines.find("/dev/") == -1:
 				continue
 
+			devuuids = []
 			dev = lines.split()[1].rstrip(":")
+			for x in uuids:
+				if x.startswith(dev):
+					devuuids.append(uuids[x])
 			r = re.compile("^\\s+([-,0-9. ]+)\\s+((?:[a-z][a-z]+))", re.IGNORECASE)
 			m = r.match(lines.split(":")[1])
 			try:
@@ -523,10 +534,17 @@ class ChooseDevicePage(QtGui.QWizardPage):
 			elif unit == 'MB' and float(size) <= 2048.0:
 				continue
 
+			present = False
 			for thing in mounts:
 				if dev in thing.split()[0] and thing.split()[2] == '/':
+					present = True
 					break
-			else:
+				for x in devuuids:
+					if '/dev/disk/by-uuid/'+x in thing.split()[0] and thing.split()[2] == '/':
+						present = True
+						break
+			
+			if not present:
 				num = num + 1
 				devices.append([num, dev, size, unit])
 

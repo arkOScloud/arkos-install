@@ -2,11 +2,11 @@ from distutils.core import setup
 
 setup(
 	name='arkos_install',
-	version='0.3',
+	version='0.3.1',
 	author='Jacob Cook',
 	author_email='jacob@citizenweb.is',
 	packages=['arkos_install'],
-	package_data={'arkos_install': ['images/*']},
+	package_data={'arkos_install': ['images/*', 'translations/*']},
 	scripts=['arkos-install'],
 	url='http://arkos.io/docs/getting-started',
 	description='Installs the latest arkOS image to an SD card',
