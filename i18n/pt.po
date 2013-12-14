@@ -361,8 +361,8 @@ msgid "Copying image to %s... <b>DONE</b>"
 msgstr "A copiar imagem para %s... <b>CONCLUÍDO</b>"
 
 #: Installer.py:697 Installer.py:688
-msgid "%0.1(got)f of %0.1(total)f MB - %(val)d%%"
-msgstr "%0.1(got)f de %0.1(total)f MB - %(val)d%%"
+msgid "{:0.1f} of {:0.1f} MB - {}%"
+msgstr "{:0.1f} de {:0.1f} MB - {}%"
 
 #: Installer.py:702 Installer.py:693
 msgid "<b>Package found in working directory!</b> Checking authenticity..."

@@ -314,7 +314,7 @@ msgid "Copying image to %s... <b>DONE</b>"
 msgstr ""
 
 #: Installer.py:697 Installer.py:688
-msgid "%0.1(got)f of %0.1(total)f MB - %(val)d%%"
+msgid "{:0.1f} of {:0.1f} MB - {}%"
 msgstr ""
 
 #: Installer.py:702 Installer.py:693
