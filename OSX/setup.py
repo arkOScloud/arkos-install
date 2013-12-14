@@ -8,7 +8,7 @@ OPTIONS = {'argv_emulation': True, 'iconfile': 'icon.icns',
 
 setup(
 	name='arkos-install',
-	version='0.3',
+	version='0.3.1',
 	author='Jacob Cook',
 	author_email='jacob@citizenweb.is',
 	packages=['arkos-install'],
