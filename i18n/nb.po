@@ -7,87 +7,85 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: Jacob Cook <jacob@citizenweb.is>\n"
 "POT-Creation-Date: 2013-10-17 15:52-0400\n"
-"PO-Revision-Date: 2013-11-14 10:01+0000\n"
-"Last-Translator: piet <hamfilter+citizenweb@gmail.com>\n"
+"PO-Revision-Date: 2013-11-17 12:47+0000\n"
+"Last-Translator: Anonymous Pootle User\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
-"Language: nl\n"
+"Language: nb\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Pootle 2.5.0\n"
-"X-POOTLE-MTIME: 1384423282.0\n"
+"X-POOTLE-MTIME: 1384692479.0\n"
 
 #: Installer.py:68 Installer.py:64
 msgid "Error"
-msgstr "Fout"
+msgstr "Feilmelding"
 
 #: Installer.py:75 Installer.py:71
 msgid "Success"
-msgstr "Succes"
+msgstr "Gjennomført"
 
 #: Installer.py:99 Installer.py:828 Installer.py:95 Installer.py:818
 msgid "arkOS Installer"
-msgstr "arkOS Installatie"
+msgstr "arkOS-Installatør"
 
 #: Installer.py:102 Installer.py:98
 msgid "Install arkOS to an SD card"
-msgstr "Installeer arkOS naar een SD kaart"
+msgstr "Installer arkOS til et SD-kort"
 
 #: Installer.py:105 Installer.py:101
 msgid "Search the network for arkOS devices"
-msgstr "Zoek naar arkOS apparaten in het netwerk"
+msgstr "Søk etter arkOS-enheter i nettverket"
 
 #: Installer.py:130
 msgid ""
 "You do not have sufficient privileges to run this program. Please run sudo "
 "Installer.py instead."
 msgstr ""
-"Je hebt onvoldoende rechten om deze applicatie te starten. Voer het commando "
-"sudo Installer.py uit om het met voldoende rechten te starten."
+"Du må ha nmap installert dersom du ønsker å bruke dette. Vennligst installer "
+"det fra ditt programvare senter, eller repository"
 
 #: Installer.py:143
 msgid ""
 "You need nmap installed in order to use this. Please install it from your "
 "distribution's software center or repositories."
 msgstr ""
-"nmap moet geïnstalleerd zijn om dit te gebruiken. Gelieve dit te installeren "
-"van je distributie's software centrum of repositories."
+"Du må ha nmap installert dersom du ønsker å bruke dette. Vennligst installer "
+"det fra ditt programvare senter, eller repositories."
 
 #: Installer.py:158 Installer.py:151
 msgid "Authenticate"
-msgstr "Authenticeer"
+msgstr "Autentiser"
 
 #: Installer.py:162 Installer.py:155
 msgid "<b>Give the username/password of a qualified user on the device</b>"
-msgstr ""
-"<b>Voer de gebruikersnaam/wachtwoord in van een geldige gebruiker op het "
-"apparaat</b>"
+msgstr "<b>Oppgi brukernavn/passord til en kvalifisert bruker på enheten</b>"
 
 #: Installer.py:165 Installer.py:161
 msgid "Username"
-msgstr "Gebruikersnaam"
+msgstr "Brukernavn"
 
 #: Installer.py:167 Installer.py:162
 msgid "Password"
-msgstr "Wachtwoord"
+msgstr "Passord"
 
 #: Installer.py:176 Installer.py:836 Installer.py:165 Installer.py:826
 msgid "Cancel"
-msgstr "Annuleren"
+msgstr "Avbryt"
 
 #: Installer.py:179 Installer.py:168
 msgid "OK"
-msgstr "Ok"
+msgstr "OK"
 
 #: Installer.py:210 Installer.py:200
 #, python-format
 msgid "Signal to %s sent successfully."
-msgstr "Succesvol een signaal naar %s gestuurd."
+msgstr "Signalet til %s ble sendt uten problemer."
 
 #: Installer.py:213 Installer.py:203
 msgid "Authentification failed"
-msgstr "Authenticatie mislukt"
+msgstr "Autentisering feilet "
 
 #: Installer.py:217 Installer.py:207
 #, python-format
@@ -95,8 +93,8 @@ msgid ""
 "Signal to %s sent successfully, but I didn't get a response. Your command "
 "may or may not have completed."
 msgstr ""
-"Succesvol een signaal naar %s gestuurd, maar geen antwoord ontvangen. Het is "
-"onduidelijk of je commando geslaagd is."
+"Signet til %s ble sendt uten problemer, men fikk ingen respons. Det er "
+"usikkert om kommandoen ble utført."
 
 #: Installer.py:221 Installer.py:211
 #, python-format
@@ -105,71 +103,70 @@ msgid ""
 "\n"
 "%s"
 msgstr ""
-"Er is een fout opgetreden tijdens het verwerken van je verzoek.\n"
+"Det oppstod en feil med behandlingen av din forespørsel.\n"
 "\n"
 "%s"
 
 #: Installer.py:233 Installer.py:223
 msgid "arkOS Network Finder"
-msgstr "arkOS Netwerk Zoeker"
+msgstr "arkOS Nettverksoppdager"
 
 #: Installer.py:241 Installer.py:231
 msgid "Name"
-msgstr "Naam"
+msgstr "Navn"
 
 #: Installer.py:241 Installer.py:231
 msgid "IP Address"
-msgstr "IP Adres"
+msgstr "IP-adresse"
 
 #: Installer.py:241 Installer.py:231
 msgid "Genesis Status"
-msgstr "Genesis Status"
+msgstr "Genesis-status"
 
 #: Installer.py:250 Installer.py:478 Installer.py:240 Installer.py:468
 msgid "Scan"
-msgstr "Scannen"
+msgstr "Gjennomsøk"
 
 #: Installer.py:255 Installer.py:245
 msgid "Shutdown"
-msgstr "Uitschakelen"
+msgstr "Skru av"
 
 #: Installer.py:260 Installer.py:250
 msgid "Restart"
-msgstr "Herstarten"
+msgstr "Omstart"
 
 #: Installer.py:265 Installer.py:255
 msgid "Reload Genesis"
-msgstr "Genesis Herladen"
+msgstr "Omstart Genesis"
 
 #: Installer.py:315 Installer.py:306
 msgid ""
 "I couldn't find any networks. Please make sure you are connected to a "
 "network."
 msgstr ""
-"Geen netwerk gevonden. Gelieve je ervan te verzekeren dat je met een netwerk "
-"verbonden bent."
+"Jeg kunne ikke finne noen nettverk. Vennligst sjekk at du er tilkoblet til "
+"et nettverk."
 
 #: Installer.py:352 Installer.py:343
 msgid "Unknown (Raspberry Pi)"
-msgstr "Onbekend (Raspberry Pi)"
+msgstr "Ukjent (Raspberry Pi)"
 
 #: Installer.py:354 Installer.py:345 Installer.py:363
 msgid "Unknown"
-msgstr "Onbekend"
+msgstr "Ukjent"
 
 #: Installer.py:369 Installer.py:360
 msgid "Please make a selection"
-msgstr "Maak een selectie"
+msgstr "Vennligst gjør et utvalg"
 
 #: Installer.py:373 Installer.py:364
 msgid "This feature can only be used on arkOS systems that have Beacon enabled"
 msgstr ""
-"Deze functie kan alleen gebruikt worden op arkOS systemen waarop Beacon "
-"ingeschakeld staat"
+"Denne funksjonen kan kun brukes på arkOS-systemer som har Beacon aktivert"
 
 #: Installer.py:388 Installer.py:379
 msgid "Introduction"
-msgstr "Introductie"
+msgstr "Introduksjon"
 
 #: Installer.py:389 Installer.py:380
 msgid ""
@@ -180,24 +177,24 @@ msgid ""
 "from our servers in preparation for the install. Please make sure your "
 "computer is connected to the Internet before continuing."
 msgstr ""
-"Welkom bij de arkOS Installer! Dit programma zal je helpen bij het "
-"installeren van het arkOS image op een SD kaart die in je computer zit.\n"
+"Velkommen til arkOS-installatøren! Dette programmet vil hjelpe deg med å "
+"installere arkOS-bildet til SD-kortet som står i maskinen.\n"
 "\n"
-"Zodra je op Volgende drukt zal je computer beginnen met het downloaden van "
-"het arkOS image van onze servers te voorbereiding op de installatie. Zorg "
-"ervoor dat je computer verbonden is met internet voordat je verder gaat."
+"Når du trykker 'Fremover' starter nedlastingen av arkOS-bildet fra våre "
+"servere. Vennligst forsikre deg om at datamaskinen din er koblet til "
+"Internett før du fortsetter."
 
 #: Installer.py:413 Installer.py:404
 msgid "Choose Mirror"
-msgstr "Kies een Mirror"
+msgstr "Velg speil"
 
 #: Installer.py:414 Installer.py:405
 msgid "Choose the download mirror closest to your location."
-msgstr "Kies de download mirror die zich het dichtst bij jou bevindt."
+msgstr "Velg nedlastingsspeilet som er nærmest deg"
 
 #: Installer.py:418 Installer.py:601 Installer.py:408 Installer.py:593
 msgid "New York (United States)"
-msgstr "New York (Verenigde Staten)"
+msgstr "New York (USA)"
 
 #: Installer.py:419 Installer.py:593 Installer.py:409 Installer.py:585
 msgid "Amsterdam (Netherlands)"
@@ -205,19 +202,19 @@ msgstr "Amsterdam (Nederland)"
 
 #: Installer.py:420 Installer.py:595 Installer.py:410 Installer.py:587
 msgid "Frankfurt (Germany)"
-msgstr "Frankfort (Duitsland)"
+msgstr "Frankfurt (Tyskland)"
 
 #: Installer.py:421 Installer.py:597 Installer.py:411 Installer.py:589
 msgid "Orlando (United States)"
-msgstr "Orlando (Verenigde Staten)"
+msgstr "Orlando (USA)"
 
 #: Installer.py:422 Installer.py:599 Installer.py:412 Installer.py:591
 msgid "Vienna (Austria)"
-msgstr "Wenen (Oostenrijk)"
+msgstr "Wien (Østerrike)"
 
 #: Installer.py:461 Installer.py:451
 msgid "Choose Device"
-msgstr "Kies Apparaat"
+msgstr "Velg enhet"
 
 #: Installer.py:462 Installer.py:452
 msgid ""
@@ -226,26 +223,25 @@ msgid ""
 "correct device! If you choose another one you may seriously damage your "
 "system."
 msgstr ""
-"Kies het gepaste toestel uit onderstaande lijst. Toestellen kleiner dan het "
-"minimum (2 GB) worden niet getoond. Merk op dat het zeer belangrijk is het "
-"juiste toestel te kiezen! Wanneer je een ander toestel kiest kan je je "
-"systeem zwaar beschadigen."
+"Velg passende enhet fra listen. Enheter mindre enn minimumet (2GB) vises "
+"ikke. Merk deg at det er viktig å velge riktig enhet! Velger du feil kan du "
+"forårsake store skader på systemet ditt."
 
 #: Installer.py:469 Installer.py:459
 msgid "Device"
-msgstr "Toestel"
+msgstr "Enhet"
 
 #: Installer.py:469 Installer.py:459
 msgid "Size"
-msgstr "Grootte"
+msgstr "Størrelse"
 
 #: Installer.py:469 Installer.py:459
 msgid "Unit"
-msgstr "Eenheid"
+msgstr "Enhet"
 
 #: Installer.py:553 Installer.py:545
 msgid "Confirm Details"
-msgstr "Bevestig Details"
+msgstr "Bekreft detaljer"
 
 #: Installer.py:554 Installer.py:546
 msgid ""
@@ -254,48 +250,48 @@ msgid ""
 "<br><br><b>NOTE that there is no way to halt the writing process once it "
 "begins.</b><br>"
 msgstr ""
-"Gelieve de details onderaan te bevestigen. De download begint zodra je Start "
-"klikt, het gekozen toestel wordt leeg gemaakt en de data "
-"overschreven.<br><br><b>PAS OP, eenmaal gestart is het onmogelijk het proces "
-"te onderbreken.</b><br>"
+"Vennligst bekreft detaljene nedenfor. Når du har trykket på 'Start' vil "
+"nedlastingen begynne, og de valgte enhetene vil bli slettet og dataene "
+"overskrevet.<br><br><b>MERK at det ikke er noen måte å stoppe prosessen når "
+"den først er startet!</b><br>"
 
 #: Installer.py:563 Installer.py:555
 msgid "Start Download/Install"
-msgstr "Start Download/Installatie"
+msgstr "Start nedlasting/installasjon"
 
 #: Installer.py:578 Installer.py:570
 msgid "<b>Mirror:</b> Amsterdam (Netherlands)"
-msgstr "<b>Mirror:</b> Amsterdam (Nederland)"
+msgstr "<b>Speil:</b> Amsterdam (Nederland)"
 
 #: Installer.py:580 Installer.py:572
 msgid "<b>Mirror:</b> Frankfurt (Germany)"
-msgstr "<b>Alternatief:</b> Frankfort (Duitsland)"
+msgstr "<b>Speil:</b> Frankfurt (Tyskland)"
 
 #: Installer.py:582 Installer.py:574
 msgid "<b>Mirror:</b> Orlando (United States)"
-msgstr "<b>Alternatief:</b> Orlando (Verenigde Staten)"
+msgstr "<b>Speil:</b> New York (USA)"
 
 #: Installer.py:584 Installer.py:576
 msgid "<b>Mirror:</b> Vienna (Austria)"
-msgstr "<b>Alternatief:</b> Wenen (Oostenrijk)"
+msgstr "<b>Speil:</b> Wien (Østerrike)"
 
 #: Installer.py:586 Installer.py:578
 msgid "<b>Mirror:</b> New York (United States)"
-msgstr "<b>Alternatief:</b> New York (Verenigde Staten)"
+msgstr "<b>Speil:</b> New York (USA)"
 
 #: Installer.py:587 Installer.py:579
 #, python-format
 msgid "<b>Device:</b> %s"
-msgstr "<b>Apparaat:</b> %s"
+msgstr "<b>Enhet:</b> %s"
 
 #: Installer.py:591 Installer.py:583
 msgid "Installing arkOS"
-msgstr "arkOS aan het installeren"
+msgstr "Installerer arkOS"
 
 #: Installer.py:607 Installer.py:599
 #, python-format
 msgid "<b>Downloading image from %s...</b>"
-msgstr "<b>Image aan het downloaden van %s...</b>"
+msgstr "<b>Laster ned bilde fra %s...</b>"
 
 #: Installer.py:634 Installer.py:655 Installer.py:626 Installer.py:646
 #, python-format
@@ -306,16 +302,16 @@ msgid ""
 "\n"
 "HTTP Error %s"
 msgstr ""
-"Het bestand kon niet worden gedownload. Controleer je internetverbinding. "
-"Neem contact op met het arkOS team als het probleem aanhoudt en "
-"internetverbinding wel correct werkt.\n"
+"Filen kunne ikke lastes ned. Vennligst sjekk internettforbindelsen. Hvis "
+"problemet fortsetter selv om forbindelsen virker fint bør du kontakte arkOS-"
+"vedlikeholderen.\n"
 "\n"
-"HTTP Foutmelding %s"
+"HTTP-feil %s"
 
 #: Installer.py:661 Installer.py:652
 #, python-format
 msgid "Downloading image from %s... <b>DONE</b>"
-msgstr "Image aan het downloaden van %s... <b>KLAAR</b>"
+msgstr "Laster ned bilde fra %s...<b>FERDIG</b>"
 
 #: Installer.py:665 Installer.py:656
 msgid ""
@@ -323,10 +319,9 @@ msgid ""
 "it will redownload the package. If this error persists, please contact the "
 "arkOS maintainers."
 msgstr ""
-"Installatie mislukt: de MD5 hashes komen niet overeen. Herstart het "
-"installatie programma zodat het opnieuw het installatie pakket zal "
-"downloaden. Neem contact op met het arkOS team als deze foutmelding blijft "
-"optreden."
+"Installasjon feilet: MD5 hashes er ikke de samme. Restart installatøren, og "
+"den vil laste ned \"pakken\" på nytt. Dersom feilen vedstår, vennligst kontakt "
+"arkOS vedlikeholderne."
 
 #: Installer.py:671 Installer.py:662
 #, python-format
@@ -334,12 +329,12 @@ msgid ""
 "<b>Copying image to %s...</b><br>(This will take a few minutes depending on "
 "SD card size.)"
 msgstr ""
-"<b>Bezig met image kopiëren naar %s...</b><br>(Dit kan enkele minuten duren, "
-"afhankelijk van de grootte van de SD kaart.)"
+"<b>Kopierer bilde til %s...</b><br>(Dette vil ta et par minutter, avhengig "
+"av størrelsen på SD-kortet). "
 
 #: Installer.py:679 Installer.py:670
 msgid "Data write in progress."
-msgstr "Data aan het wegschrijven."
+msgstr "Skriving av data pågår."
 
 #: Installer.py:687 Installer.py:678
 #, python-format
@@ -348,38 +343,38 @@ msgid ""
 "\n"
 "%s"
 msgstr ""
-"Het schrijven naar de schijf mislukte met de volgende foutmelding:\n"
+"Skriving til disken feilet med følgende feilmelding:\n"
 "\n"
 "%s"
 
 #: Installer.py:690 Installer.py:681
 #, python-format
 msgid "Copying image to %s... <b>DONE</b>"
-msgstr "Bezig met kopiëren naar %s... <b>KLAAR</b>"
+msgstr "Kopierer bilde til %s... <b>FERDIG</b>"
 
 #: Installer.py:697 Installer.py:688
 msgid "%0.1(got)f of %0.1(total)f MB - %(val)d%%"
-msgstr "%0.1(ontvangen)f of %0.1(totaal)f MB - %(val)d%%"
+msgstr "%0.1(got)f av %0.1(total)f MB - %(val)d%%"
 
 #: Installer.py:702 Installer.py:693
 msgid "<b>Package found in working directory!</b> Checking authenticity..."
-msgstr "<b>Pakket gevonden in huidige folder!</b> Geldigheid controleren..."
+msgstr "<b>En pakke ble funnet i arbeidsmappen!</b> Sjekker autentiseringen..."
 
 #: Installer.py:710 Installer.py:736 Installer.py:700 Installer.py:726
 msgid ""
 "Package found in working directory, but MD5 check failed. Redownloading..."
 msgstr ""
-"Pakket gevonden in huidige folder maar de MD5 controle is mislukt. Opnieuw "
-"downloaden..."
+"En pakke ble funnet i arbeidsmappen, men MD5-sjekken feilet. Laster ned på "
+"nytt..."
 
 #: Installer.py:715 Installer.py:741 Installer.py:705 Installer.py:731
 msgid "Authentic package found in working directory. Skipping download..."
 msgstr ""
-"Geldig pakket gevonden in huidige folder. Download wordt overgeslagen..."
+"En autentisk pakke ble funnet i arbeidsmappen. Hopper over nedlasting..."
 
 #: Installer.py:775 Installer.py:765
 msgid "Installation Complete"
-msgstr "Installatie Voltooid"
+msgstr "Installasjonen er fullført"
 
 #: Installer.py:776 Installer.py:766
 msgid ""
@@ -391,21 +386,20 @@ msgid ""
 "find the IP address.<br><br>Your initial Genesis login credentials are:"
 "<br>Username: <b>admin</b><br>Password: <b>admin</b>"
 msgstr ""
-"Gefeliciteerd! Het image is succesvol weggeschreven naar de SD "
-"kaart.<br><br>Steek de SD kaart in je Raspberry Pi en verbind het met je "
-"router.<br><br>Na ongeveer 2 minuten kun je je server configureren door je "
-"browser te openen en met Genesis te verbinden op het volgende "
-"adres:<br><b>http://arkOS:8000</b><br> of gebruik de Netwerk Zoeker om het "
-"IP adres te vinden.<br><br>De standaar Genesis login gegevens "
-"zijn:<br>Gebruikersnaam:<b>admin</b><br>Wachtwoord: <b>admin</b>"
+"Gratulerer! Bildet ble skrevet til SD-kortet uten problemer.<br><br>Sett inn "
+"SD-kortet i Raspberry Pi'en din og koble den til routeren.<br><br>Etter ett "
+"minutt eller to kan du konfigurere serveren din ved å peke nettleseren din "
+"til Genesis på følgende adresse:<br><b>http://arkOS:8000</b><br>eller bruke "
+"Nettverksleteren i denne installatøren til å finne IP-adressen.<br><br>Logg "
+"inn i Genesis med:<br>Brukernavn: <b>admin</b><br>Passord: <b>admin</b>"
 
 #: Installer.py:788 Installer.py:778
 msgid "Remove the downloaded files from your computer on exit"
-msgstr "Verwijder de gedownloade bestanden van je computer bij het afsluiten"
+msgstr "Fjern de nedlastede filene fra datamaskinen din ved nedstenging"
 
 #: Installer.py:847 Installer.py:837
 msgid "Quit?"
-msgstr "Afsluiten?"
+msgstr "Avslutt?"
 
 #: Installer.py:848 Installer.py:838
 msgid ""
@@ -415,41 +409,32 @@ msgid ""
 "If a disk write operation is in progress, this will not be able to stop that "
 "process."
 msgstr ""
-"Weet je zeker dat je wilt afsluiten? De installatie is nog niet niet "
-"afgerond en je zal je SD kaart niet kunnen gebruiken.\n"
+"Er du sikker på at du bil avslutte? Installasjonen er ikke ferdig og SD-"
+"kortet vil ikke fungere.\n"
 "\n"
-"Als er nog een schrijf operatie bezig is dan zal afsluiten deze operatie "
-"niet stoppen."
+"Hvis det skrives til disken vil ikke dette stoppe skriveprosessen."
 
 #: Installer.py:121
 msgid ""
 "You do not have sufficient privileges to run this program. Please run the "
 "arkOS Installer app from your Applications folder."
 msgstr ""
-"Je hebt onvoldoende rechten om deze applicatie uit te voeren. Start de arkOS "
-"Installer vanuit je Applicaties folder."
+"Du har ikke tilstrekkelige rettigheter til å kjøre programmet. Vennligst "
+"start arkOS-installasjonsprogrammet fra 'Programmer'-mappen."
 
 #: Installer.py:136
 msgid ""
 "You need nmap installed in order to use this. Please go to <a href=\"http://"
 "nmap.org/download.html#macosx\">their website</a> to download."
 msgstr ""
-"nmap moet geïnstalleerd zijn om dit te gebruiken. Je kan dit downloaden van "
-"<a href=\"http://nmap.org/download.html#macosx\">hun website</a>."
+"Du må ha nmap installert for å kunne bruke dette. Vennligst gå til <a "
+"href=\"http://nmap.org/download.html#macosx\">their website</a> for å laste "
+"ned."
 
 #: Installer.py:928
 msgid ""
 "The drive could not be unmounted. Make sure it is not in use before "
 "continuing."
 msgstr ""
-"De schijf kon niet ontkoppeld worden. Controleer of hij niet in gebruikt is "
-"voordat je verdergaat."
-
-#~ msgid "Amsterdam (Europe)"
-#~ msgstr "Amsterdam (Europa)"
-
-#~ msgid "<b>Mirror:</b> Amsterdam (European Union)"
-#~ msgstr "<b>Alternatief:</b> Amsterdam (Europese Unie)"
-
-#~ msgid "Amsterdam (European Union)"
-#~ msgstr "Amsterdam (Europese Unie)"
+"Enheten kunne ikke av-monteres. Sjekk at den ikke er i bruk før du "
+"fortsetter."
