@@ -46,8 +46,8 @@ from PyQt4 import QtCore, QtGui
 
 def init_internationalization():
 	locale.setlocale(locale.LC_ALL, '')
-	loc = locale.getlocale()
-	filename = os.path.join(os.path.dirname(__file__), "translations/%s.mo" % locale.getlocale()[0][0:2])
+	loc = locale.getlocale()[0][0:2]
+	filename = os.path.join(os.path.dirname(__file__), "translations/%s.mo" % (loc if loc != 'no' else 'nb'))
 	try:
 		translation = gettext.GNUTranslations(open(filename, "rb"))
   	except IOError:
@@ -408,8 +408,12 @@ class ChooseMirrorPage(QtGui.QWizardPage):
 		self.nybtn = QtGui.QRadioButton(_('New York (United States)'))
 		self.ambtn = QtGui.QRadioButton(_('Amsterdam (Netherlands)'))
 		self.frbtn = QtGui.QRadioButton(_('Frankfurt (Germany)'))
+		self.orbtn = QtGui.QRadioButton(_('Orlando (United States)'))
+		self.vibtn = QtGui.QRadioButton(_('Vienna (Austria)'))
 		self.ambtn.toggled.connect(self.set_selection)
 		self.frbtn.toggled.connect(self.set_selection)
+		self.orbtn.toggled.connect(self.set_selection)
+		self.vibtn.toggled.connect(self.set_selection)
 		self.nybtn.setChecked(True)
 
 		vbox = QtGui.QVBoxLayout()
@@ -417,6 +421,8 @@ class ChooseMirrorPage(QtGui.QWizardPage):
 		vbox.addWidget(self.nybtn)
 		vbox.addWidget(self.ambtn)
 		vbox.addWidget(self.frbtn)
+		vbox.addWidget(self.orbtn)
+		vbox.addWidget(self.vibtn)
 
 		self.setLayout(vbox)
 
@@ -426,8 +432,12 @@ class ChooseMirrorPage(QtGui.QWizardPage):
 	def set_selection(self):
 		if self.frbtn.isChecked():
 			self.parent.mirror = 'fr'
-		elif self.ambtn.isChecked:
+		elif self.ambtn.isChecked():
 			self.parent.mirror = 'am'
+		elif self.orbtn.isChecked():
+			self.parent.mirror = 'or'
+		elif self.vibtn.isChecked():
+			self.parent.mirror = 'vi'
 		else:
 			self.parent.mirror = 'ny'
 
@@ -560,6 +570,10 @@ class ActionPage(QtGui.QWizardPage):
 			self.mirlabel.setText(_('<b>Mirror:</b> Amsterdam (Netherlands)'))
 		elif self.parent.mirror == 'fr':
 			self.mirlabel.setText(_('<b>Mirror:</b> Frankfurt (Germany)'))
+		elif self.parent.mirror == 'or':
+			self.mirlabel.setText(_('<b>Mirror:</b> Orlando (United States)'))
+		elif self.parent.mirror == 'vi':
+			self.mirlabel.setText(_('<b>Mirror:</b> Vienna (Austria)'))
 		else:
 			self.mirlabel.setText(_('<b>Mirror:</b> New York (United States)'))
 		self.devlabel.setText(_('<b>Device:</b> %s') % self.parent.device)
@@ -571,6 +585,10 @@ class ActionPage(QtGui.QWizardPage):
 			mirror_name = _('Amsterdam (Netherlands)')
 		elif self.parent.mirror == 'fr':
 			mirror_name = _('Frankfurt (Germany)')
+		elif self.parent.mirror == 'or':
+			mirror_name = _('Orlando (United States)')
+		elif self.parent.mirror == 'vi':
+			mirror_name = _('Vienna (Austria)')
 		else:
 			mirror_name = _('New York (United States)')
 
@@ -644,6 +662,7 @@ class ActionPage(QtGui.QWizardPage):
 		self.imglabel.setText(_("<b>Copying image to %s...</b><br>"
 					"(This will take a few minutes depending on "
 					"SD card size.)") % self.parent.device)
+		self.imglabel.setWordWrap(True)
 		self.progressbar.reset()
 		self.progressbar.setMinimum(0)
 		self.progressbar.setMaximum(0)
@@ -667,7 +686,7 @@ class ActionPage(QtGui.QWizardPage):
 
 	def updatebar(self, val, got, total):
 		self.progressbar.setValue(val)
-		self.datalabel.setText(_("%0.1(got)f of %0.1(total)f MB - %(val)d%%") % {'got': got, 'total': total, 'val': val))
+		self.datalabel.setText(_("{:0.1f} of {:0.1f} MB - {}%").format(got, total, val))
 
 	def pkg_check(self):
 		# If package exists, check authenticity then skip download if necessary
@@ -691,7 +710,11 @@ class ActionPage(QtGui.QWizardPage):
 				if self.parent.mirror == 'am':
 					mirror_link = 'https://amnl.arkos.io/'
 				elif self.parent.mirror == 'fr':
-					mirror_link = 'https://frde.arkos.io/'
+					mirror_link = 'http://frde.arkos.io/'
+				elif self.parent.mirror == 'or':
+					mirror_link = 'http://orfl.arkos.io/'
+				elif self.parent.mirror == 'vi':
+					mirror_link = 'http://wien.wohlmuther-it.com'
 				else:
 					mirror_link = 'https://nyus.arkos.io/'
 				dl_md5 = urllib2.urlopen(mirror_link + 'latest.tar.gz.md5.txt')
@@ -848,7 +871,11 @@ class Downloader(QtCore.QThread):
 		if mirror == 'am':
 			self.mirror_link = 'https://amnl.arkos.io/'
 		elif mirror == 'fr':
-			self.mirror_link = 'https://frde.arkos.io/'
+			self.mirror_link = 'http://frde.arkos.io/'
+		elif mirror == 'or':
+			self.mirror_link = 'http://orfl.arkos.io/'
+		elif mirror == 'vi':
+			self.mirror_link = 'http://wien.wohlmuther-it.com/'
 		else:
 			self.mirror_link = 'https://nyus.arkos.io/'
 		self.filename = filename
