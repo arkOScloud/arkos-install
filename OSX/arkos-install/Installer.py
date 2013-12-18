@@ -129,13 +129,11 @@ class Assistant(QtGui.QWidget):
 		self.close()
 
 	def finder(self):
-		nmap = os.path.exists('/usr/local/bin/nmap')
-		if nmap:
+		if os.path.exists('/usr/local/bin/nmap') or os.path.exists('/opt/local/bin/nmap'):
 			self.find = Finder()
 		else:
-			btn2.clicked.connect(error_handler(self, _('You need nmap installed in order to use this. '
-				'Please go to <a href="http://nmap.org/download.html#macosx">their website</a> to download.'), close=False))
-		self.close()
+			error_handler(self, _('You need nmap installed in order to use this. '
+				'Please go to <a href="http://nmap.org/download.html#macosx">their website</a> to download.'), close=False)
 
 
 ###################################################
@@ -312,7 +310,10 @@ class Finder(QtGui.QWidget):
 					addrrange = item
 
 		# Step 2: find all RPis on the network
-		scan = subprocess.check_output(['/usr/local/bin/nmap', '-oX', '-', '-sn', addrrange])
+		if os.path.exists('/usr/local/bin/nmap'):
+			scan = subprocess.check_output(['/usr/local/bin/nmap', '-oX', '-', '-sn', addrrange])
+		else:
+			scan = subprocess.check_output(['/opt/local/bin/nmap', '-oX', '-', '-sn', addrrange])
 		hosts = ET.fromstring(scan)
 		ips = []
 		rpis = hosts.findall('.//address[@vendor="Raspberry Pi Foundation"]/..')
