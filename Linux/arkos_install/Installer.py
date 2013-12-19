@@ -41,6 +41,59 @@ import xml.etree.ElementTree as ET
 
 from PyQt4 import QtCore, QtGui
 
+
+###################################################
+##  Mirrors
+################################################### 
+
+def init_mirrorlist():
+	global MIRRORS
+	MIRRORS = {
+		'nyus': {
+			'name': _('New York, NY (United States)'),
+			'status': 'official',
+			'region': _('North America'),
+			'url': 'https://nyus.mirror.arkos.io/'
+		},
+		'amnl': {
+			'name': _('Amsterdam (The Netherlands)'),
+			'status': 'official',
+			'region': _('Europe'),
+			'url': 'https://amnl.mirror.arkos.io/'
+		},
+		'frde': {
+			'name': _('Frankfurt (Germany)'),
+			'status': 'community',
+			'region': _('Europe'),
+			'url': 'http://frde.mirror.arkos.io/'
+		},
+		'orfl': {
+			'name': _('Orlando, FL (United States)'),
+			'status': 'community',
+			'region': _('Europe'),
+			'url': 'http://orfl.mirror.arkos.io/'
+		},
+		'pafr': {
+			'name': _('Paris (France)'),
+			'status': 'community',
+			'region': _('Europe'),
+			'url': 'http://pafr.mirror.arkos.io/'
+		},
+		'tatw': {
+			'name': _('Taipei (Taiwan)'),
+			'status': 'community',
+			'region': _('Asia/Pacific'),
+			'url': 'http://tatw.mirror.arkos.io/'
+		},
+		'viat': {
+			'name': _('Vienna (Austria)'),
+			'status': 'community', 
+			'region': _('Europe'),
+			'url': 'http://viat.mirror.arkos.io/'
+		}
+	}
+
+
 ###################################################
 ##  Internationalization
 ################################################### 
@@ -159,7 +212,7 @@ class AuthDialog(QtGui.QDialog):
 		self.setWindowIcon(QtGui.QIcon(os.path.join(os.path.dirname(__file__), 'images/icon.png')))
 
 		vbox = QtGui.QVBoxLayout()
-		label = QtGui.QLabel(_("<b>Give the username/password of a qualified user on the device</b>"))
+		label = QtGui.QLabel('<b>'+_('Give the username/password of a qualified user on the device')+'</b>')
 		label.setWordWrap(True)
 		table = QtGui.QGridLayout()
 		ulabel = QtGui.QLabel(_('Username'))
@@ -218,7 +271,7 @@ class AuthDialog(QtGui.QDialog):
 					'Your command may or may not have completed.') % r)
 				self.close()
 			else:
-				error_handler(self, _('There was an error processing your request.\n\n%s') + str(e), close=False)
+				error_handler(self, _('There was an error processing your request.')+'\n\n%s' % str(e), close=False)
 			sslSocket.close()
  
 
@@ -388,8 +441,8 @@ class IntroPage(QtGui.QWizardPage):
 		self.setTitle(_('Introduction'))
 		label = QtGui.QLabel(_('Welcome to the arkOS Installer! This '
 			'program will guide you through installing the arkOS image '
-			'to an SD card inserted into your computer.\n\n'
-			'Once you click Forward, your computer will start downloading '
+			'to an SD card inserted into your computer.')+'\n\n'
+			+_('Once you click Forward, your computer will start downloading '
 			'the arkOS image from our servers in preparation for the '
 			'install. Please make sure your computer is connected to the '
 			'Internet before continuing.'))
@@ -415,24 +468,16 @@ class ChooseMirrorPage(QtGui.QWizardPage):
 			'location.'))
 		label.setWordWrap(True)
 
-		self.nybtn = QtGui.QRadioButton(_('New York (United States)'))
-		self.ambtn = QtGui.QRadioButton(_('Amsterdam (Netherlands)'))
-		self.frbtn = QtGui.QRadioButton(_('Frankfurt (Germany)'))
-		self.orbtn = QtGui.QRadioButton(_('Orlando (United States)'))
-		self.vibtn = QtGui.QRadioButton(_('Vienna (Austria)'))
-		self.ambtn.toggled.connect(self.set_selection)
-		self.frbtn.toggled.connect(self.set_selection)
-		self.orbtn.toggled.connect(self.set_selection)
-		self.vibtn.toggled.connect(self.set_selection)
-		self.nybtn.setChecked(True)
-
 		vbox = QtGui.QVBoxLayout()
 		vbox.addWidget(label)
-		vbox.addWidget(self.nybtn)
-		vbox.addWidget(self.ambtn)
-		vbox.addWidget(self.frbtn)
-		vbox.addWidget(self.orbtn)
-		vbox.addWidget(self.vibtn)
+
+		btnnum = 0
+		for x in sorted(MIRRORS):
+			MIRRORS[x]['btn'] = QtGui.QRadioButton(MIRRORS[x]['name'])
+			MIRRORS[x]['btn'].toggled.connect(self.set_selection)
+			MIRRORS[x]['btn'].setChecked(True) if btnnum == 0 else None
+			vbox.addWidget(MIRRORS[x]['btn'])
+			btnnum = btnnum + 1
 
 		self.setLayout(vbox)
 
@@ -440,16 +485,10 @@ class ChooseMirrorPage(QtGui.QWizardPage):
 		return Installer.PageChooseDevice
 
 	def set_selection(self):
-		if self.frbtn.isChecked():
-			self.parent.mirror = 'fr'
-		elif self.ambtn.isChecked():
-			self.parent.mirror = 'am'
-		elif self.orbtn.isChecked():
-			self.parent.mirror = 'or'
-		elif self.vibtn.isChecked():
-			self.parent.mirror = 'vi'
-		else:
-			self.parent.mirror = 'ny'
+		for x in MIRRORS:
+			if MIRRORS[x]['btn'].isChecked():
+				self.parent.mirror = x
+				break
 
 
 class ChooseDevicePage(QtGui.QWizardPage):
@@ -574,9 +613,9 @@ class ActionPage(QtGui.QWizardPage):
 		self.setTitle(_('Confirm Details'))
 		self.label = QtGui.QLabel(_('Please confirm the details below. Once you '
 			'click Start, the download will begin, then the selected '
-			'device will be erased and data will be overwritten.<br><br>'
-			'<b>NOTE that there is no way to halt the writing process '
-			'once it begins.</b><br>'))
+			'device will be erased and data will be overwritten.')+'<br><br>'
+			+'<b>'+_('NOTE that there is no way to halt the writing process '
+			'once it begins.')+'</b><br>')
 		self.label.setWordWrap(True)
 		self.mirlabel = QtGui.QLabel()
 		self.devlabel = QtGui.QLabel()
@@ -595,37 +634,18 @@ class ActionPage(QtGui.QWizardPage):
 		self.setLayout(self.vbox)
 
 	def initializePage(self):
-		if self.parent.mirror == 'am':
-			self.mirlabel.setText(_('<b>Mirror:</b> Amsterdam (Netherlands)'))
-		elif self.parent.mirror == 'fr':
-			self.mirlabel.setText(_('<b>Mirror:</b> Frankfurt (Germany)'))
-		elif self.parent.mirror == 'or':
-			self.mirlabel.setText(_('<b>Mirror:</b> Orlando (United States)'))
-		elif self.parent.mirror == 'vi':
-			self.mirlabel.setText(_('<b>Mirror:</b> Vienna (Austria)'))
-		else:
-			self.mirlabel.setText(_('<b>Mirror:</b> New York (United States)'))
-		self.devlabel.setText(_('<b>Device:</b> %s') % self.parent.device)
+		self.mirlabel.setText('<b>'+_('Mirror')+':</b> %s' % MIRRORS[self.parent.mirror]['name'])
+		self.devlabel.setText('<b>'+_('Device')+':</b> %s' % self.parent.device)
 
 	def install(self):
 		# Prepare the installation
 		self.setTitle(_('Installing arkOS'))
-		if self.parent.mirror == 'am':
-			mirror_name = _('Amsterdam (Netherlands)')
-		elif self.parent.mirror == 'fr':
-			mirror_name = _('Frankfurt (Germany)')
-		elif self.parent.mirror == 'or':
-			mirror_name = _('Orlando (United States)')
-		elif self.parent.mirror == 'vi':
-			mirror_name = _('Vienna (Austria)')
-		else:
-			mirror_name = _('New York (United States)')
 
 		self.label.close()
 		self.mirlabel.close()
 		self.devlabel.close()
 		self.btn.close()
-		self.dllabel = QtGui.QLabel(_("<b>Downloading image from %s...</b>") % mirror_name)
+		self.dllabel = QtGui.QLabel('<b>'+_('Downloading image from %s...')+'</b>' % MIRRORS[self.parent.mirror]['name'])
 		self.imglabel = QtGui.QLabel()
 		self.pblabel = QtGui.QLabel()
 		self.progressbar = QtGui.QProgressBar()
@@ -655,7 +675,7 @@ class ActionPage(QtGui.QWizardPage):
 				error_handler(self, _('The file could not be downloaded. '
 					'Please check your Internet connection. If the '
 					'problem persists and your connection is fine, please '
-					'contact the arkOS maintainers.\n\nHTTP Error %s') % str(download_result))
+					'contact the arkOS maintainers.')+'\n\n'+_('HTTP Error %s') % str(download_result))
 				return
 
 			self.progressbar.reset()
@@ -676,10 +696,10 @@ class ActionPage(QtGui.QWizardPage):
 				error_handler(self, _('The file could not be downloaded. '
 					'Please check your Internet connection. If the '
 					'problem persists and your connection is fine, please '
-					'contact the arkOS maintainers.\n\nHTTP Error %s') % str(download_result))
+					'contact the arkOS maintainers.')+'\n\n'+_('HTTP Error %s') % str(download_result))
 				return
 
-			self.dllabel.setText(_("Downloading image from %s... <b>DONE</b>") % mirror_name)
+			self.dllabel.setText(_('Downloading image from %s...')+' <b>'+_('DONE')+'</b>' % MIRRORS[self.parent.mirror]['name'])
 
 			md5error = self.md5sum()
 			if md5error == 0:
@@ -689,9 +709,8 @@ class ActionPage(QtGui.QWizardPage):
 					'contact the arkOS maintainers.'))
 				return
 
-		self.imglabel.setText(_("<b>Copying image to %s...</b><br>"
-					"(This will take a few minutes depending on "
-					"SD card size.)") % self.parent.device)
+		self.imglabel.setText('<b>'+_('Copying image to %s...')+'</b><br>'
+					+'('+_('This will take a few minutes depending on SD card size.')+')' % self.parent.device)
 		self.imglabel.setWordWrap(True)
 		self.progressbar.reset()
 		self.progressbar.setMinimum(0)
@@ -707,21 +726,21 @@ class ActionPage(QtGui.QWizardPage):
 		write_result = self.parent.queue.get()
 		if write_result != False:
 			error_handler(self, _('The disk writing process failed with the '
-							'following error:\n\n%s') % write_result)
+							'following error:')+'\n\n%s' % write_result)
 			return
-		self.imglabel.setText(_('Copying image to %s... <b>DONE</b>') % self.parent.device)
+		self.imglabel.setText(_('Copying image to %s...')+' <b>'+_('DONE')+'</b>' % self.parent.device)
 		self.parent.setPage(self.parent.PageConclusion, ConclusionPage(self.parent))
 		self.parent.setOption(QtGui.QWizard.NoBackButtonOnLastPage, True)
 		self.parent.next()
 
 	def updatebar(self, val, got, total):
 		self.progressbar.setValue(val)
-		self.datalabel.setText(_("{:0.1f} of {:0.1f} MB - {}%").format(got, total, val))
+		self.datalabel.setText(_('{:0.1f} of {:0.1f} MB - {}%').format(got, total, val))
 
 	def pkg_check(self):
 		# If package exists, check authenticity then skip download if necessary
 		if os.path.exists('latest.tar.gz'):
-			self.dllabel.setText(_('<b>Package found in working directory!</b> '
+			self.dllabel.setText(_('Package found in working directory! '
 				'Checking authenticity...'))
 			while QtGui.QApplication.hasPendingEvents():
 				QtGui.QApplication.processEvents()
@@ -738,17 +757,9 @@ class ActionPage(QtGui.QWizardPage):
 						'working directory. Skipping download...'))
 					return 1
 			else:
-				if self.parent.mirror == 'am':
-					mirror_link = 'https://amnl.arkos.io/'
-				elif self.parent.mirror == 'fr':
-					mirror_link = 'http://frde.arkos.io/'
-				elif self.parent.mirror == 'or':
-					mirror_link = 'http://orfl.arkos.io/'
-				elif self.parent.mirror == 'vi':
-					mirror_link = 'http://wien.wohlmuther-it.com'
-				else:
-					mirror_link = 'https://nyus.arkos.io/'
-				dl_md5 = urllib2.urlopen(mirror_link + 'latest.tar.gz.md5.txt')
+				dl_md5 = urllib2.urlopen(
+					MIRRORS[self.parent.mirror]['url'] + 'latest.tar.gz.md5.txt'
+				)
 				md5_File = open('latest.tar.gz.md5.txt', 'w')
 				md5_File.write(dl_md5.read())
 				md5_File.close()
@@ -796,16 +807,16 @@ class ConclusionPage(QtGui.QWizardPage):
 		# Show success message and setup instructions
 		self.setTitle(_('Installation Complete'))
 		label = QtGui.QLabel(_('Congratulations! Your image has been '
-			'written to the SD card successfully.<br><br>Insert the SD card '
-			'into your Raspberry Pi and connect it to your router.<br><br>'
-			'After a minute or two, set up your server by opening your browser '
-			'and connecting to Genesis at the following address:'
-			'<br><b>http://arkOS:8000</b>'
-			'<br>or use the Network Browser option in this Installer to '
-			'find the IP address.<br><br>'
-			'Your initial Genesis login credentials are:<br>'
-			'Username: <b>admin</b><br>'
-			'Password: <b>admin</b>'))
+			'written to the SD card successfully.')+'<br><br>'+_('Insert the SD card '
+			'into your Raspberry Pi and connect it to your router.')+'<br><br>'
+			+_('After a minute or two, set up your server by opening your browser '
+			'and connecting to Genesis at the following address:')
+			+'<br><b>http://arkOS:8000</b><br>'
+			+_('or use the Network Browser option in this Installer to '
+			'find the IP address.')+'<br><br>'
+			+_('Your initial Genesis login credentials are:')+'<br>'
+			+_('Username:')+' <b>admin</b><br>'
+			+_('Password:')+' <b>admin</b>')
 		label.setWordWrap(True)
 		self.box = QtGui.QCheckBox(_('Remove the downloaded files from your '
 			'computer on exit'))
@@ -836,7 +847,7 @@ class Installer(QtGui.QWizard):
 	(PageIntro, PageChooseMirror, PageChooseDevice, PageAction, 
 		PageConclusion) = range(NUM_PAGES)
 
-	mirror = 'ny'
+	mirror = 'nyus'
 	device = ''
 	queue = Queue.Queue()
 
@@ -868,8 +879,8 @@ class Installer(QtGui.QWizard):
 		# Run this when the user cancels or exits at a sensitive time
 		msg = QtGui.QMessageBox.warning(self, _('Quit?'), 
 			_('Are you sure you want to quit? The installation is not '
-			'complete and you will not be able to use your SD card.\n\n'
-			'If a disk write operation is in progress, this will not be '
+			'complete and you will not be able to use your SD card.')+'\n\n'
+			+_('If a disk write operation is in progress, this will not be '
 			'able to stop that process.'), QtGui.QMessageBox.Yes | 
 			QtGui.QMessageBox.No, QtGui.QMessageBox.No)
 
@@ -899,16 +910,7 @@ class Downloader(QtCore.QThread):
 	def __init__(self, queue, mirror, filename):
 		super(Downloader, self).__init__()
 		self.queue = queue
-		if mirror == 'am':
-			self.mirror_link = 'https://amnl.arkos.io/'
-		elif mirror == 'fr':
-			self.mirror_link = 'http://frde.arkos.io/'
-		elif mirror == 'or':
-			self.mirror_link = 'http://orfl.arkos.io/'
-		elif mirror == 'vi':
-			self.mirror_link = 'http://wien.wohlmuther-it.com/'
-		else:
-			self.mirror_link = 'https://nyus.arkos.io/'
+		self.mirror_link = MIRRORS[mirror]['url']
 		self.filename = filename
 
 	def run(self):
@@ -972,6 +974,7 @@ class ImgWriter(QtCore.QThread):
 
 def main():
 	init_internationalization()
+	init_mirrorlist()
 	app = QtGui.QApplication(sys.argv)
 	asst = Assistant()
 	sys.exit(app.exec_())
