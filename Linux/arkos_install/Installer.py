@@ -917,6 +917,9 @@ class Downloader(QtCore.QThread):
 		# Download the files and report their status
 		link = self.mirror_link + self.filename
 		try:
+			proxy = urllib2.ProxyHandler()
+			opener = urllib2.build_opener(proxy)
+			urllib2.install_opener(opener)
 			dl_file = urllib2.urlopen(link)
 		except urllib2.HTTPError, e:
 			self.queue.put(e.code)
