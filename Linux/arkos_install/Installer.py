@@ -67,17 +67,17 @@ def init_mirrorlist():
 			'region': _('Europe'),
 			'url': 'http://frde.mirror.arkos.io/'
 		},
-		'orfl': {
-			'name': _('Orlando, FL (United States)'),
-			'status': 'community',
-			'region': _('Europe'),
-			'url': 'http://orfl.mirror.arkos.io/'
-		},
 		'pafr': {
 			'name': _('Paris (France)'),
 			'status': 'community',
 			'region': _('Europe'),
 			'url': 'http://pafr.mirror.arkos.io/'
+		},
+		'reis': {
+			'name': _('Reykjavik (Iceland)'),
+			'status': 'community',
+			'region': _('Europe'),
+			'url': 'http://reis.mirror.arkos.io/'
 		},
 		'tatw': {
 			'name': _('Taipei (Taiwan)'),
