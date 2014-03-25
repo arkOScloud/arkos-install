@@ -710,7 +710,8 @@ class ActionPage(QtGui.QWizardPage):
 		self.progressbar.setMinimum(0)
 		self.progressbar.setMaximum(0)
 
-		self.write = ImgWriter(self.parent.queue, self.parent.device)
+		self.write = ImgWriter(self.parent.queue, self.parent.device, 
+			self.parent.path if self.parent.path else 'latest.tar.gz')
 		self.datalabel.setText(_('Data write in progress.'))
 		self.write.start()
 
@@ -733,13 +734,20 @@ class ActionPage(QtGui.QWizardPage):
 
 	def pkg_check(self):
 		# If package exists, check authenticity then skip download if necessary
-		if os.path.exists('latest.tar.gz'):
+		pkg_loc = 'latest.tar.gz'
+		md5_loc = 'latest.tar.gz.md5.txt'
+		if os.path.exists(pkg_loc):
+			if os.path.islink(pkg_loc):
+				pkg_loc = os.path.realpath(pkg_loc)
+				self.parent.path = pkg_loc
 			self.dllabel.setText(_('Package found in working directory! '
 				'Checking authenticity...'))
 			while QtGui.QApplication.hasPendingEvents():
 				QtGui.QApplication.processEvents()
-			if os.path.exists('latest.tar.gz.md5.txt'):
-				result = self.md5sum()
+			if os.path.exists(md5_loc):
+				if os.path.islink(md5_loc):
+					md5_loc = os.path.realpath(md5_loc)
+				result = self.md5sum(pkg_loc, md5_loc)
 				if result == 0:
 					# the md5s were different. continue with download as is
 					self.dllabel.setText(_('Package found in working '
@@ -757,7 +765,7 @@ class ActionPage(QtGui.QWizardPage):
 				md5_File = open('latest.tar.gz.md5.txt', 'w')
 				md5_File.write(dl_md5.read())
 				md5_File.close()
-				result = self.md5sum()
+				result = self.md5sum(pkg_loc, 'latest.tar.gz.md5.txt')
 				if result == 0:
 					# the md5s were different. gotta redownload the package
 					self.dllabel.setText(_('Package found in working '
@@ -770,9 +778,9 @@ class ActionPage(QtGui.QWizardPage):
 					return 1
 		return 0
 
-	def md5sum(self):
+	def md5sum(self, pkg_loc, md5_loc):
 		# Returns an md5 hash for the file parameter
-		f = file('latest.tar.gz', 'rb')
+		f = file(pkg_loc, 'rb')
 		m = md5.new()
 		while True:
 			d = f.read(8096)
@@ -781,7 +789,7 @@ class ActionPage(QtGui.QWizardPage):
 			m.update(d)
 		f.close()
 		pack_md5 = m.hexdigest()
-		file_md5 = open('latest.tar.gz.md5.txt')
+		file_md5 = open(md5_loc, 'r')
 		compare_md5 = file_md5.read().decode("utf-8")
 		file_md5.close()
 		if not pack_md5 in compare_md5:
@@ -844,6 +852,7 @@ class Installer(QtGui.QWizard):
 	mirror = 'nyus'
 	device = ''
 	queue = Queue.Queue()
+	path = ''
 
 	def __init__(self):
 		super(Installer, self).__init__()
@@ -944,10 +953,11 @@ class Downloader(QtCore.QThread):
 
 class ImgWriter(QtCore.QThread):
 	# Writes the downloaded image to disk
-	def __init__(self, queue, device):
+	def __init__(self, queue, device, path):
 		super(ImgWriter, self).__init__()
 		self.device = device
 		self.queue = queue
+		self.path = path
 
 	def run(self):
 		# Write the image and refresh partition
@@ -956,7 +966,7 @@ class ImgWriter(QtCore.QThread):
 		for thing in mounts:
 			if str(self.device) in thing.split()[0]:
 				cmd = subprocess.Popen(['umount', str(thing).split()[0]]).wait()
-		unzip = subprocess.Popen(['tar', 'xzOf', 'latest.tar.gz'], 
+		unzip = subprocess.Popen(['tar', 'xzOf', self.path], 
 			stdout=subprocess.PIPE)
 		dd = subprocess.Popen(
 			['dd', 'status=noxfer', 'bs=1M', 'of=' + self.device], 
