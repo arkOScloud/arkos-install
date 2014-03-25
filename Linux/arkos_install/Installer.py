@@ -3,7 +3,7 @@
 ########################################################################
 ##
 ##  arkOS Installer for Linux
-##  Copyright (C) 2013 Jacob Cook
+##  Copyright (C) 2013-2014 Jacob Cook
 ##  jacob@citizenweb.is
 ##
 ##  Uses elements of Raspbmc Installer, (C) 2013 Sam Nazarko
@@ -84,12 +84,6 @@ def init_mirrorlist():
 			'status': 'community',
 			'region': _('Asia/Pacific'),
 			'url': 'http://tatw.mirror.arkos.io/'
-		},
-		'viat': {
-			'name': _('Vienna (Austria)'),
-			'status': 'community', 
-			'region': _('Europe'),
-			'url': 'http://viat.mirror.arkos.io/'
 		}
 	}
 
@@ -271,7 +265,7 @@ class AuthDialog(QtGui.QDialog):
 					'Your command may or may not have completed.') % r)
 				self.close()
 			else:
-				error_handler(self, _('There was an error processing your request.')+'\n\n%s' % str(e), close=False)
+				error_handler(self, _('There was an error processing your request.')+'\n\n'+str(e), close=False)
 			sslSocket.close()
  
 
@@ -422,7 +416,7 @@ class Finder(QtGui.QWidget):
 			error_handler(self, _('Please make a selection'), close=False)
 			return
 
-		if self.tree_view.currentItem().text(1).startsWith('Unknown'):
+		if self.tree_view.currentItem().text(1).startsWith(_('Unknown')):
 			error_handler(self, _('This feature can only be used on arkOS systems that have Beacon enabled'), close=False)
 			return
 
@@ -645,7 +639,7 @@ class ActionPage(QtGui.QWizardPage):
 		self.mirlabel.close()
 		self.devlabel.close()
 		self.btn.close()
-		self.dllabel = QtGui.QLabel('<b>'+_('Downloading image from %s...')+'</b>' % MIRRORS[self.parent.mirror]['name'])
+		self.dllabel = QtGui.QLabel('<b>'+_('Downloading image from %s...') % MIRRORS[self.parent.mirror]['name'] + '</b>')
 		self.imglabel = QtGui.QLabel()
 		self.pblabel = QtGui.QLabel()
 		self.progressbar = QtGui.QProgressBar()
@@ -699,7 +693,7 @@ class ActionPage(QtGui.QWizardPage):
 					'contact the arkOS maintainers.')+'\n\n'+_('HTTP Error %s') % str(download_result))
 				return
 
-			self.dllabel.setText(_('Downloading image from %s...')+' <b>'+_('DONE')+'</b>' % MIRRORS[self.parent.mirror]['name'])
+			self.dllabel.setText(_('Downloading image from %s...') % MIRRORS[self.parent.mirror]['name'] +' <b>'+_('DONE')+'</b>')
 
 			md5error = self.md5sum()
 			if md5error == 0:
@@ -709,8 +703,8 @@ class ActionPage(QtGui.QWizardPage):
 					'contact the arkOS maintainers.'))
 				return
 
-		self.imglabel.setText('<b>'+_('Copying image to %s...')+'</b><br>'
-					+'('+_('This will take a few minutes depending on SD card size.')+')' % self.parent.device)
+		self.imglabel.setText('<b>'+_('Copying image to %s...') % self.parent.device +'</b><br>'
+					+'('+_('This will take a few minutes depending on SD card size.')+')')
 		self.imglabel.setWordWrap(True)
 		self.progressbar.reset()
 		self.progressbar.setMinimum(0)
@@ -726,9 +720,9 @@ class ActionPage(QtGui.QWizardPage):
 		write_result = self.parent.queue.get()
 		if write_result != False:
 			error_handler(self, _('The disk writing process failed with the '
-							'following error:')+'\n\n%s' % write_result)
+							'following error:')+'\n\n'+write_result)
 			return
-		self.imglabel.setText(_('Copying image to %s...')+' <b>'+_('DONE')+'</b>' % self.parent.device)
+		self.imglabel.setText(_('Copying image to %s...') % self.parent.device +' <b>'+_('DONE')+'</b>')
 		self.parent.setPage(self.parent.PageConclusion, ConclusionPage(self.parent))
 		self.parent.setOption(QtGui.QWizard.NoBackButtonOnLastPage, True)
 		self.parent.next()

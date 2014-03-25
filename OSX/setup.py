@@ -7,11 +7,11 @@ OPTIONS = {'argv_emulation': True, 'iconfile': 'icon.icns',
 	'includes': ['netifaces', 'sip', 'PyQt4']}
 
 setup(
-	name='arkos-install',
+	name='arkos_install',
 	version='0.3.1',
 	author='Jacob Cook',
 	author_email='jacob@citizenweb.is',
-	packages=['arkos-install'],
+	packages=['arkos_install'],
 	url='http://arkos.io/docs/getting-started',
 	description='Installs the latest arkOS image to an SD card',
     app=APP,

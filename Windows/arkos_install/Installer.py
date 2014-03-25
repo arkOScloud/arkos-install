@@ -311,7 +311,7 @@ class AuthDialog(QtGui.QDialog):
 					'Your command may or may not have completed.') % r)
 				self.close()
 			else:
-				error_handler(self, _('There was an error processing your request.')+'\n\n%s' + str(e), close=False)
+				error_handler(self, _('There was an error processing your request.')+'\n\n'+str(e), close=False)
 			sslSocket.close()
  
 
@@ -671,7 +671,7 @@ class ActionPage(QtGui.QWizardPage):
 		self.mirlabel.close()
 		self.devlabel.close()
 		self.btn.close()
-		self.dllabel = QtGui.QLabel('<b>'+_('Downloading image from %s...' % MIRRORS[self.parent.mirror]['name'])+'</b>')
+		self.dllabel = QtGui.QLabel('<b>'+_('Downloading image from %s...') % MIRRORS[self.parent.mirror]['name'] +'</b>')
 		self.imglabel = QtGui.QLabel()
 		self.pblabel = QtGui.QLabel()
 		self.progressbar = QtGui.QProgressBar()
@@ -701,7 +701,7 @@ class ActionPage(QtGui.QWizardPage):
 				error_handler(self, _('The file could not be downloaded. '
 					'Please check your Internet connection. If the '
 					'problem persists and your connection is fine, please '
-					'contact the arkOS maintainers.')+'\n\n'+_('HTTP Error %s'%str(download_result)))
+					'contact the arkOS maintainers.')+'\n\n'+_('HTTP Error %s')%str(download_result))
 				return
 
 			self.progressbar.reset()
@@ -722,10 +722,10 @@ class ActionPage(QtGui.QWizardPage):
 				error_handler(self, _('The file could not be downloaded. '
 					'Please check your Internet connection. If the '
 					'problem persists and your connection is fine, please '
-					'contact the arkOS maintainers.')+'\n\n'+_('HTTP Error %s'%str(download_result)))
+					'contact the arkOS maintainers.')+'\n\n'+_('HTTP Error %s')%str(download_result))
 				return
 
-			self.dllabel.setText(_('Downloading image from %s...' % MIRRORS[self.parent.mirror]['name'])+' <b>'+_('DONE')+'</b>')
+			self.dllabel.setText(_('Downloading image from %s...') % MIRRORS[self.parent.mirror]['name'] +' <b>'+_('DONE')+'</b>')
 
 			md5error = self.md5sum()
 			if md5error == 0:
@@ -735,7 +735,7 @@ class ActionPage(QtGui.QWizardPage):
 					'contact the arkOS maintainers.'))
 				return
 
-		self.imglabel.setText('<b>'+_('Copying image to %s...' % self.parent.device)+'</b><br>'
+		self.imglabel.setText('<b>'+_('Copying image to %s...')% self.parent.device+'</b><br>'
 					+'('+_('This will take a few minutes depending on SD card size.')+')')
 		self.imglabel.setWordWrap(True)
 		self.progressbar.reset()
@@ -761,9 +761,9 @@ class ActionPage(QtGui.QWizardPage):
 		write_result = self.parent.queue.get()
 		if write_result != False:
 			error_handler(self, _('The disk writing process failed with the '
-							'following error:')+'\n\n%s' % write_result)
+							'following error:')+'\n\n'+write_result)
 			return
-		self.imglabel.setText(_('Copying image to %s...' % self.parent.device)+' <b>'+_('DONE')+'</b>')
+		self.imglabel.setText(_('Copying image to %s...') % self.parent.device +' <b>'+_('DONE')+'</b>')
 		self.parent.setPage(self.parent.PageConclusion, ConclusionPage(self.parent))
 		self.parent.setOption(QtGui.QWizard.NoBackButtonOnLastPage, True)
 		self.parent.next()
