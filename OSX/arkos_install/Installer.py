@@ -928,6 +928,7 @@ class ImgWriter(QtCore.QThread):
 
 	def run(self):
 		# Write the image and refresh partition
+		error = False
 		ddcmd = ['dd', 'bs=1m', 'of=' + str(self.device)]
 		umcmd = ['diskutil', 'unmountDisk', str(self.device)]
 		try:
@@ -943,8 +944,9 @@ class ImgWriter(QtCore.QThread):
 		error = dd.communicate()[1]
 		if "error" in error or "denied" in error:
 			self.queue.put(error)
-		else:
-			self.queue.put(False)
+			return
+		unmount = subprocess.Popen(umcmd).wait()
+		self.queue.put(False)
 
 
 def main():
