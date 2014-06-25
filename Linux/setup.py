@@ -2,7 +2,7 @@ from distutils.core import setup
 
 setup(
 	name='arkos_install',
-	version='0.3.1',
+	version='0.3.2',
 	author='Jacob Cook',
 	author_email='jacob@citizenweb.is',
 	packages=['arkos_install'],

@@ -1,14 +1,8 @@
 from setuptools import setup
 
-APP = ['arkos-install/Installer.py']
-DATA_FILES = ['arkOS Installer.applescript']
-OPTIONS = {'argv_emulation': True, 'iconfile': 'icon.icns',
-	'resources': ['arkos-install/images','arkos-install/translations'],  
-	'includes': ['netifaces', 'sip', 'PyQt4']}
-
 setup(
 	name='arkos_install',
-	version='0.3.1',
+	version='0.3.2',
 	author='Jacob Cook',
 	author_email='jacob@citizenweb.is',
 	packages=['arkos_install'],

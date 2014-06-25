@@ -58,11 +58,23 @@ def init_mirrorlist():
 			'region': _('North America'),
 			'url': 'https://nyus.mirror.arkos.io/'
 		},
+		'sfus': {
+			'name': _('San Francisco, CA (United States)'),
+			'status': 'official',
+			'region': _('North America'),
+			'url': 'https://sfus.mirror.arkos.io/'
+		},
 		'amnl': {
 			'name': _('Amsterdam (The Netherlands)'),
 			'status': 'official',
 			'region': _('Europe'),
 			'url': 'https://amnl.mirror.arkos.io/'
+		},
+		'sbfr': {
+			'name': _('Strasbourg (France)'),
+			'status': 'official',
+			'region': _('Europe'),
+			'url': 'https://sbfr.mirror.arkos.io/'
 		},
 		'frde': {
 			'name': _('Frankfurt (Germany)'),
@@ -81,6 +93,12 @@ def init_mirrorlist():
 			'status': 'community',
 			'region': _('Europe'),
 			'url': 'http://reis.mirror.arkos.io/'
+		},
+		'nyus': {
+			'name': _('Singapore'),
+			'status': 'official',
+			'region': _('Asia'),
+			'url': 'https://sgsg.mirror.arkos.io/'
 		},
 		'tatw': {
 			'name': _('Taipei (Taiwan)'),
@@ -689,7 +707,7 @@ class ActionPage(QtGui.QWizardPage):
 		if override == 0:
 			# If no valid package was found, run the download and image writer threads
 			self.download = Downloader(self.parent.queue, self.parent.mirror, 
-				'latest.zip.md5.txt')
+				'latest-rpi.zip.md5.txt')
 			self.download.start()
 
 			while self.download.isRunning():
@@ -709,7 +727,7 @@ class ActionPage(QtGui.QWizardPage):
 			self.progressbar.setMaximum(100)
 
 			self.download = Downloader(self.parent.queue, self.parent.mirror, 
-				'latest.zip', True)
+				'latest-rpi.zip', True)
 			self.download.partDone.connect(self.updatebar)
 			self.download.start()
 
@@ -774,12 +792,12 @@ class ActionPage(QtGui.QWizardPage):
 
 	def pkg_check(self):
 		# If package exists, check authenticity then skip download if necessary
-		if os.path.exists('latest.zip'):
+		if os.path.exists('latest-rpi.zip'):
 			self.dllabel.setText(_('Package found in working directory! '
 				'Checking authenticity...'))
 			while QtGui.QApplication.hasPendingEvents():
 				QtGui.QApplication.processEvents()
-			if os.path.exists('latest.zip.md5.txt'):
+			if os.path.exists('latest-rpi.zip.md5.txt'):
 				result = self.md5sum()
 				if result == 0:
 					# the md5s were different. continue with download as is
@@ -793,9 +811,9 @@ class ActionPage(QtGui.QWizardPage):
 					return 1
 			else:
 				dl_md5 = urllib2.urlopen(
-					MIRRORS[self.parent.mirror]['url'] + 'latest.tar.gz.md5.txt'
+					MIRRORS[self.parent.mirror]['url'] + 'latest-rpi.tar.gz.md5.txt'
 				)
-				md5_File = open('latest.zip.md5.txt', 'w')
+				md5_File = open('latest-rpi.zip.md5.txt', 'w')
 				md5_File.write(dl_md5.read())
 				md5_File.close()
 				result = self.md5sum()
@@ -813,7 +831,7 @@ class ActionPage(QtGui.QWizardPage):
 
 	def md5sum(self):
 		# Returns an md5 hash for the file parameter
-		f = file('latest.zip', 'rb')
+		f = file('latest-rpi.zip', 'rb')
 		m = md5.new()
 		while True:
 			d = f.read(8096)
@@ -822,7 +840,7 @@ class ActionPage(QtGui.QWizardPage):
 			m.update(d)
 		f.close()
 		pack_md5 = m.hexdigest()
-		file_md5 = open('latest.zip.md5.txt')
+		file_md5 = open('latest-rpi.zip.md5.txt')
 		compare_md5 = file_md5.read().decode("utf-8")
 		file_md5.close()
 		if not pack_md5 in compare_md5:
@@ -867,8 +885,8 @@ class ConclusionPage(QtGui.QWizardPage):
 
 	def validatePage(self):
 		if self.box.isChecked():
-			os.unlink('latest.zip')
-			os.unlink('latest.zip.md5.txt')
+			os.unlink('latest-rpi.zip')
+			os.unlink('latest-rpi.zip.md5.txt')
 		return True
 
 
@@ -950,7 +968,7 @@ class Downloader(QtCore.QThread):
 
 	def run(self):
 		# Download the files and report their status
-		link = self.mirror_link + self.filename
+		link = self.mirror_link + 'os/' + self.filename
 		try:
 			proxy = urllib2.ProxyHandler()
 			opener = urllib2.build_opener(proxy)
@@ -1011,7 +1029,7 @@ class ImgWriter(QtCore.QThread):
 			self.queue.put(_('Error in cleaning the disk. Please manually format, then try again.'))
 			return
 
-		z = zipfile.ZipFile('latest.zip', 'r')
+		z = zipfile.ZipFile('latest-rpi.zip', 'r')
 		imgfile = z.namelist()[0]
 		z.extractall()
 		o = win32file.CreateFile(str(self.device),

@@ -54,11 +54,23 @@ def init_mirrorlist():
 			'region': _('North America'),
 			'url': 'https://nyus.mirror.arkos.io/'
 		},
+		'sfus': {
+			'name': _('San Francisco, CA (United States)'),
+			'status': 'official',
+			'region': _('North America'),
+			'url': 'https://sfus.mirror.arkos.io/'
+		},
 		'amnl': {
 			'name': _('Amsterdam (The Netherlands)'),
 			'status': 'official',
 			'region': _('Europe'),
 			'url': 'https://amnl.mirror.arkos.io/'
+		},
+		'sbfr': {
+			'name': _('Strasbourg (France)'),
+			'status': 'official',
+			'region': _('Europe'),
+			'url': 'https://sbfr.mirror.arkos.io/'
 		},
 		'frde': {
 			'name': _('Frankfurt (Germany)'),
@@ -77,6 +89,12 @@ def init_mirrorlist():
 			'status': 'community',
 			'region': _('Europe'),
 			'url': 'http://reis.mirror.arkos.io/'
+		},
+		'nyus': {
+			'name': _('Singapore'),
+			'status': 'official',
+			'region': _('Asia'),
+			'url': 'https://sgsg.mirror.arkos.io/'
 		},
 		'tatw': {
 			'name': _('Taipei (Taiwan)'),
@@ -630,7 +648,7 @@ class ActionPage(QtGui.QWizardPage):
 		if override == 0:
 			# If no valid package was found, run the download and image writer threads
 			self.download = Downloader(self.parent.queue, self.parent.mirror, 
-				'latest.tar.gz.md5.txt')
+				'latest-rpi.tar.gz.md5.txt')
 			self.download.start()
 
 			while self.download.isRunning():
@@ -649,7 +667,7 @@ class ActionPage(QtGui.QWizardPage):
 			self.progressbar.setMaximum(100)
 
 			self.download = Downloader(self.parent.queue, self.parent.mirror, 
-				'latest.tar.gz')
+				'latest-rpi.tar.gz')
 			self.download.partDone.connect(self.updatebar)
 			self.download.start()
 
@@ -683,7 +701,7 @@ class ActionPage(QtGui.QWizardPage):
 
 		self.write = ImgWriter(self.parent.queue, self.parent.device,
 			self.parent.path if self.parent.path else \
-			'/Users/'+os.getlogin()+'/Downloads/latest.tar.gz')
+			'/Users/'+os.getlogin()+'/Downloads/latest-rpi.tar.gz')
 		self.datalabel.setText(_('Data write in progress.'))
 		self.write.start()
 
@@ -706,8 +724,8 @@ class ActionPage(QtGui.QWizardPage):
 
 	def pkg_check(self):
 		# If package exists, check authenticity then skip download if necessary
-		pkg_loc = '/Users/'+os.getlogin()+'/Downloads/latest.tar.gz'
-		md5_loc = '/Users/'+os.getlogin()+'/Downloads/latest.tar.gz.md5.txt'
+		pkg_loc = '/Users/'+os.getlogin()+'/Downloads/latest-rpi.tar.gz'
+		md5_loc = '/Users/'+os.getlogin()+'/Downloads/latest-rpi.tar.gz.md5.txt'
 		if os.path.exists(pkg_loc):
 			if os.path.islink(pkg_loc):
 				pkg_loc = os.path.realpath(pkg_loc)
@@ -731,8 +749,8 @@ class ActionPage(QtGui.QWizardPage):
 					return 1
 			else:
 				dl_md5 = urllib2.urlopen(
-					MIRRORS[self.parent.mirror]['url'] + 'latest.tar.gz.md5.txt')
-				md5_File = open('/Users/'+os.getlogin()+'/Downloads/latest.tar.gz.md5.txt', 'w')
+					MIRRORS[self.parent.mirror]['url'] + 'latest-rpi.tar.gz.md5.txt')
+				md5_File = open('/Users/'+os.getlogin()+'/Downloads/latest-rpi.tar.gz.md5.txt', 'w')
 				md5_File.write(dl_md5.read())
 				md5_File.close()
 				result = self.md5sum(pkg_loc, md5_loc)
@@ -804,8 +822,8 @@ class ConclusionPage(QtGui.QWizardPage):
 
 	def validatePage(self):
 		if self.box.isChecked():
-			os.unlink('/Users/'+os.getlogin()+'/Downloads/latest.tar.gz')
-			os.unlink('/Users/'+os.getlogin()+'/Downloads/latest.tar.gz.md5.txt')
+			os.unlink('/Users/'+os.getlogin()+'/Downloads/latest-rpi.tar.gz')
+			os.unlink('/Users/'+os.getlogin()+'/Downloads/latest-rpi.tar.gz.md5.txt')
 		return True
 
 
@@ -888,7 +906,7 @@ class Downloader(QtCore.QThread):
 
 	def run(self):
 		# Download the files and report their status
-		link = self.mirror_link + self.filename
+		link = self.mirror_link + 'os/' + self.filename
 		try:
 			dl_file = urllib2.urlopen(link)
 		except urllib2.HTTPError, e:
